@@ -271,9 +271,6 @@ Possible improvements include:
 
 **Prathamesh B. Patil**
 
-Third-Year Computer Science Engineering Student
-Artificial Intelligence & Machine Learning
-
 Interested in Data Analytics, SQL, Python, Power BI, and Machine Learning.
 
 ---
