@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Digital GramPanchayat</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<style>
+   /* BODY BACKGROUND IMAGE */
+body{
+font-family: Arial;
+margin: 0;
+
+background-image: url("grampanchayat.jpeg");
+background-size: cover;
+background-repeat: no-repeat;
+background-position: center;
+background-attachment: fixed;
+}
+
+/* HEADER */
+header{
+background: green;
+color: white;
+text-align: center;
+padding: 20px;
+}
+
+/* NAVIGATION BAR */
+nav{
+background: #333;
+padding: 10px;
+text-align: center;
+}
+
+nav a{
+color: white;
+margin: 15px;
+text-decoration: none;
+font-size: 18px;
+}
+
+/* MAIN SECTION */
+section{
+padding: 30px;
+text-align: center;
+background: rgba(206, 196, 196, 0.607);
+width: 60%;
+margin: 40px auto;
+border-radius: 10px;
+}
+
+/* FORM */
+form{
+width: 300px;
+margin: auto;
+display: flex;
+flex-direction: column;
+}
+
+input,select,textarea{
+margin: 10px;
+padding: 10px;
+}
+
+/* BUTTON */
+button{
+background: green;
+color: white;
+border: none;
+padding: 10px;
+cursor: pointer;
+border-radius: 5px;
+}
+
+button:hover{
+background: darkgreen;
+}
+
+/* SERVICE CARDS */
+.card{
+background: rgba(206, 196, 196, 0.607);
+padding: 20px;
+margin: 20px auto;
+width: 250px;
+box-shadow: none;
+}
+/*border-radius: 10px;
+}
+
+/* FOOTER */
+footer{
+background: #333;
+color: white;
+text-align: center;
+padding: 10px;
+}
+</style>
+
+<body>
+    
+<header>
+<h1>Digital GramPanchayat Portal</h1>
+<p>Smart Village e-Services</p>
+</header>
+
+<nav>
+<a href="index.html">Home</a>
+<a href="citizen.html">Citizen</a>
+<a href="certificate.html">Certificates</a>
+<a href="complaint.html">Complaint</a>
+<a href="scheme.html">Schemes</a>
+<a href="payment.html">Payment</a>
+</nav>
+
+<section>
+<h2>Welcome</h2>
+<p>Use this portal to access GramPanchayat services online.</p>
+
+<div class="card">
+<h3>Citizen Registration</h3>
+<a href="citizen.html"><button>Register</button></a>
+</div>
+
+<div class="card">
+<h3>Apply Certificate</h3>
+<a href="certificate.html"><button>Apply</button></a>
+</div>
+
+<div class="card">
+<h3>Register Complaint</h3>
+<a href="complaint.html"><button>Submit</button></a>
+</div>
+
+<div class="card">
+<h3>Government Schemes</h3>
+<a href="scheme.html"><button>View</button></a>
+</div>
+
+<div class="card">
+<h3>Service Payment</h3>
+<a href="payment.html"><button>Pay</button></a>
+</div>
+
+</section>
+
+<footer>
+<p>© 2026 Digital GramPanchayat</p>
+</footer>
+
+</body>
+</html>
