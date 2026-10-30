@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}All Experiments | Integrated Machine Learning Laboratory Dashboard{% endblock %}
+{% block breadcrumb %}All Experiments{% endblock %}
+
+{% block content %}
+<section id="experiments">
+  <div class="page-header">
+    <div class="page-header-pre">ACADEMIC MACHINE LEARNING LABORATORY</div>
+    <h1 class="page-header-title">Laboratory Experiments Library</h1>
+    <p class="page-header-sub">
+      Consolidated practical curriculum covering Python EDA foundations and 11 classical Machine Learning algorithms with reproducible training, held-out evaluation, explainable AI, and publication-ready lab reports.
+    </p>
+  </div>
+
+  <!-- Filter & Search Toolbar -->
+  <div class="card" style="margin-bottom: 24px;">
+    <div class="card-body" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+      <div style="flex: 1; min-width: 260px; max-width: 420px; position: relative;">
+        <input type="search" id="experimentSearch" class="form-control" placeholder="Search algorithm, feature, or dataset..." aria-label="Search experiments">
+      </div>
+
+      <div class="tabs-nav" style="margin-bottom: 0;">
+        <button class="tab-item filter-tab-btn {% if active_category not in ['Regression', 'Classification'] %}active{% endif %}" data-filter="All">
+          All Experiments (12)
+        </button>
+        <button class="tab-item filter-tab-btn {% if active_category == 'Regression' %}active{% endif %}" data-filter="Regression">
+          Regression (3)
+        </button>
+        <button class="tab-item filter-tab-btn {% if active_category == 'Classification' %}active{% endif %}" data-filter="Classification">
+          Classification (8)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Experiments Grid -->
+  <div class="grid-3-col" id="experimentsGrid" style="gap: 20px;">
+
+    <!-- Experiment 01 (Supporting Module): Python Libraries & Dataset Exploration -->
+    <article class="card experiment-card" data-num="01" data-title="python libraries dataset exploration eda" data-category="Supporting" data-dataset="all datasets">
+      <div class="card-header" style="padding-bottom: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <span class="badge" style="background: var(--sky-100); color: var(--sky-700); font-weight: 700;">MODULE 01</span>
+          <span class="badge" style="background: var(--slate-100); color: var(--slate-600);">Supporting Module</span>
+        </div>
+      </div>
+      <div class="card-body" style="display: flex; flex-direction: column; flex: 1;">
+        <h3 style="font-size: 16px; font-weight: 800; color: var(--navy-900); margin-bottom: 6px;">Python Libraries & Dataset Exploration</h3>
+        <p style="font-size: 13px; color: var(--slate-600); line-height: 1.5; margin-bottom: 14px;">
+          Foundational exploratory data analysis module for inspecting raw tabular structures, summary stats, correlation matrices, and Python ML libraries.
+        </p>
+        <div style="font-size: 12px; color: var(--slate-500); margin-bottom: 16px; display: flex; flex-direction: column; gap: 4px;">
+          <div><strong>Core Stack:</strong> NumPy, Pandas, Matplotlib, Seaborn, Scikit-Learn</div>
+          <div><strong>Data:</strong> All Project Benchmark CSV Files</div>
+        </div>
+        <div style="margin-top: auto; display: flex; gap: 8px;">
+          <a href="{{ url_for('dataset_explorer') }}" class="btn btn-primary btn-sm" style="flex: 1; justify-content: center;">
+            Open Dataset Explorer &rarr;
+          </a>
+        </div>
+      </div>
+    </article>
+
+    <!-- Algorithms 01 to 11 (Numbered 02 to 12 in the complete curriculum) -->
+    {% for key, item in algorithms.items() %}
+    <article class="card experiment-card" 
+             data-num="{{ item.num }}" 
+             data-title="{{ item.title|lower }}" 
+             data-category="{{ item.category }}" 
+             data-dataset="{{ item.dataset_name|lower }}">
+      <div class="card-header" style="padding-bottom: 8px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <span class="badge" style="background: var(--teal-100); color: var(--teal-700); font-weight: 700;">EXP {{ item.num }}</span>
+          <span class="badge {% if item.category == 'Regression' %}badge-secondary{% else %}badge-primary{% endif %}">
+            {{ item.category }}
+          </span>
+        </div>
+      </div>
+
+      <div class="card-body" style="display: flex; flex-direction: column; flex: 1;">
+        <h3 style="font-size: 16px; font-weight: 800; color: var(--navy-900); margin-bottom: 6px;">{{ item.title }}</h3>
+        <p style="font-size: 13px; color: var(--slate-600); line-height: 1.5; margin-bottom: 14px;">
+          {{ item.description }}
+        </p>
+
+        <div style="font-size: 12px; color: var(--slate-600); margin-bottom: 16px; display: flex; flex-direction: column; gap: 4px;">
+          <div><strong>Input:</strong> {{ item.input_feature }}</div>
+          <div><strong>Model:</strong> {{ item.model_type }}</div>
+          <div><strong>Dataset:</strong> <code>{{ item.dataset_name }}</code></div>
+        </div>
+
+        <div style="margin-top: auto; display: flex; flex-direction: column; gap: 8px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <a href="{{ url_for('algorithm', key=key) }}" class="btn btn-secondary btn-sm" style="justify-content: center;">
+              Test Model
+            </a>
+            <a href="{{ url_for('training', exp=key) }}" class="btn btn-secondary btn-sm" style="justify-content: center;">
+              Train Studio
+            </a>
+          </div>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            <a href="{{ url_for('results', key=key) }}" class="btn btn-primary btn-sm" style="justify-content: center;">
+              Visualizations
+            </a>
+            <a href="{{ url_for('explainability', key=key) }}" class="btn btn-secondary btn-sm" style="justify-content: center; background: var(--cyan-50); color: var(--cyan-700); border-color: var(--cyan-100);">
+              XAI Lab
+            </a>
+          </div>
+          <a href="{{ url_for('api_export_pdf', key=key) }}" class="btn btn-secondary btn-sm" style="justify-content: center; font-size: 11px;">
+            <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 12px; height: 12px; margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download Lab Report (PDF)
+          </a>
+        </div>
+      </div>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const searchInput = document.getElementById("experimentSearch");
+  const cards = Array.from(document.querySelectorAll(".experiment-card"));
+  const filterBtns = Array.from(document.querySelectorAll(".filter-tab-btn"));
+
+  let activeCategory = "All";
+
+  function filterCards() {
+    const q = (searchInput.value || "").toLowerCase().trim();
+    cards.forEach(card => {
+      const title = card.dataset.title || "";
+      const cat = card.dataset.category || "";
+      const ds = card.dataset.dataset || "";
+
+      const matchSearch = !q || title.includes(q) || ds.includes(q);
+      const matchCat = (activeCategory === "All") || (cat === activeCategory) || (cat === "Supporting" && activeCategory === "All");
+
+      if (matchSearch && matchCat) {
+        card.style.display = "flex";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  }
+
+  filterBtns.forEach(btn => {
+    btn.addEventListener("click", () => {
+      filterBtns.forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      activeCategory = btn.dataset.filter;
+      filterCards();
+    });
+  });
+
+  if (searchInput) {
+    searchInput.addEventListener("input", filterCards);
+  }
+});
+</script>
+{% endblock %}

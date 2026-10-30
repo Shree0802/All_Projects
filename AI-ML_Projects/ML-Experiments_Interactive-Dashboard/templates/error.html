@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}{{ error_code }} - {{ error_title }} | ML Lab Dashboard{% endblock %}
+{% block breadcrumb %}Error · {{ error_code }}{% endblock %}
+
+{% block content %}
+<div class="card" style="text-align: center; padding: 60px 24px; max-width: 600px; margin: 40px auto;">
+  <div style="font-size: 48px; font-weight: 900; color: var(--teal-600); line-height: 1; margin-bottom: 12px;">
+    {{ error_code }}
+  </div>
+  <h1 style="font-size: 22px; font-weight: 800; color: var(--navy-900); margin-bottom: 8px;">
+    {{ error_title }}
+  </h1>
+  <p style="color: var(--slate-500); font-size: 13.5px; line-height: 1.5; margin-bottom: 24px;">
+    {{ error_message }}
+  </p>
+  <div style="display: flex; gap: 12px; justify-content: center;">
+    <a href="{{ url_for('home') }}" class="btn btn-primary btn-sm">Return to Overview</a>
+    <a href="{{ url_for('experiments') }}" class="btn btn-secondary btn-sm">Explore Experiments</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}{{ spec.title }} | ML Lab Dashboard{% endblock %}
+{% block breadcrumb %}EXP {{ '%02d'|format(algo_number) }} · {{ spec.title }}{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb Bar & Quick Switchers -->
+<div class="detail-top-nav-bar">
+  <a href="{{ url_for('experiments') }}" class="btn-back-link">
+    <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    <span>Back to Experiment Library</span>
+  </a>
+
+  <div class="exp-nav-buttons">
+    {% if prev_key %}
+      <a href="{{ url_for('algorithm', key=prev_key) }}" class="exp-nav-btn" title="Previous Experiment">← Prev Exp</a>
+    {% endif %}
+    {% if next_key %}
+      <a href="{{ url_for('algorithm', key=next_key) }}" class="exp-nav-btn" title="Next Experiment">Next Exp →</a>
+    {% endif %}
+  </div>
+</div>
+
+<!-- Detail Hero Header Card -->
+<section class="detail-header-card">
+  <div class="detail-header-main">
+    <div class="hero-eyebrow">
+      <span class="badge-cat {{ 'badge-cat-regression' if spec.category == 'Regression' else 'badge-cat-classification' }}">
+        {{ spec.category }}
+      </span>
+      <span>EXPERIMENT {{ '%02d'|format(algo_number) }} OF 11</span>
+    </div>
+    <h1>{{ spec.title }}</h1>
+    <p class="detail-header-desc">{{ spec.objective }}</p>
+  </div>
+  <div class="detail-huge-number">{{ '%02d'|format(algo_number) }}</div>
+</section>
+
+<!-- Two-column Grid: Form + Output/Metadata -->
+<div class="detail-main-grid">
+  <!-- Input Form Card -->
+  <section class="form-card">
+    <div class="form-panel-header">
+      <div>
+        <h2 class="form-panel-title">Model Input Configuration</h2>
+        <span style="font-size: 11.5px; color: var(--slate-500);">Provide features for real-time model inference.</span>
+      </div>
+      {% if spec.sample_data %}
+      <button type="button" class="btn-sample-fill" id="btnFillSample">
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>Autofill Sample Data</span>
+      </button>
+      {% endif %}
+    </div>
+
+    {% if error %}
+    <div class="alert-box alert-danger" style="margin-bottom: 18px;">
+      <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div>
+        <strong>Input Validation Warning:</strong> {{ error }}
+      </div>
+    </div>
+    {% endif %}
+
+    <form method="POST" id="predictionForm">
+      <div class="inputs-grid-layout {% if spec.fields|length > 6 %}dense-layout{% endif %}">
+        {% for field, label, typ, step, placeholder in spec.fields %}
+        <div class="form-field-group {% if typ == 'text' %}full-width{% endif %}">
+          <label class="form-label" for="{{ field }}">{{ label }}</label>
+          {% if typ == 'text' %}
+            <textarea id="{{ field }}" 
+                      name="{{ field }}" 
+                      class="form-textarea-control" 
+                      placeholder="{{ placeholder }}" 
+                      required>{{ values.get(field, '') }}</textarea>
+          {% else %}
+            <input type="number" 
+                   step="{{ step }}" 
+                   id="{{ field }}" 
+                   name="{{ field }}" 
+                   class="form-input-control" 
+                   value="{{ values.get(field, '') }}" 
+                   placeholder="{{ placeholder }}" 
+                   required>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+
+      <button type="submit" class="btn-predict-submit" id="submitBtn">
+        <span>Run Model Prediction</span>
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      </button>
+    </form>
+  </section>
+
+  <!-- Right Side: Prediction Result & Experiment Record -->
+  <div class="aside-cards-column">
+    <!-- Prediction Result Card -->
+    {% if result %}
+    <div class="result-card prediction-active-panel">
+      <span class="prediction-status-badge">
+        <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        Prediction Complete
+      </span>
+      <div class="prediction-output-label">Model Predicted Output</div>
+      <div class="prediction-output-value">{{ result.prediction }}</div>
+
+      {% if result.confidence is not none %}
+      <div class="confidence-box">
+        <div class="confidence-header">
+          <span>{{ result.get('confidence_label', 'Prediction Confidence') }}</span>
+          <span class="confidence-score">{{ result.confidence }}%</span>
+        </div>
+        <div class="confidence-progress-bar">
+          <div class="confidence-progress-fill" style="width: {{ result.confidence }}%;"></div>
+        </div>
+      </div>
+      {% if result.class_probabilities %}
+      <div style="font-size: 11px; margin-bottom: 12px; display: flex; flex-direction: column; gap: 4px;">
+        <span style="font-weight: 700; color: var(--navy-800);">Class Probabilities:</span>
+        <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+          {% for c, p in result.class_probabilities.items() %}
+            <span class="code-pill">{{ c }}: {{ p }}%</span>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+      {% else %}
+      <p style="font-size: 11px; color: var(--slate-500); margin-bottom: 12px;">
+        <em>Note: This model uses a deterministic decision boundary; probabilistic confidence scoring is not applicable.</em>
+      </p>
+      {% endif %}
+
+      <p class="prediction-note">
+        Output calculated live by pre-trained artifact <code>{{ spec.saved_model }}</code>.
+      </p>
+    </div>
+    {% else %}
+    <!-- Empty State Before Prediction -->
+    <div class="result-card result-empty-state">
+      <div class="empty-state-icon-box">
+        <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+      </div>
+      <h3 class="empty-state-heading">Ready for Prediction</h3>
+      <p class="empty-state-text">
+        Enter the required values and run the model to see the prediction.
+      </p>
+      <div style="display: flex; flex-direction: column; gap: 8px; text-align: left; max-width: 260px; margin: 0 auto; font-size: 11.5px; color: var(--slate-600);">
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span class="exp-num-badge">1</span> Enter or autofill feature values
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span class="exp-num-badge">2</span> Execute pre-trained model inference
+        </div>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <span class="exp-num-badge">3</span> Inspect predictions and metrics
+        </div>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- Model & Dataset Record Card -->
+    <div class="spec-record-box">
+      <h3 class="spec-record-title">Experiment Specifications</h3>
+      <div class="spec-record-list">
+        <div class="spec-record-item">
+          <span>Experiment</span>
+          <strong>{{ '%02d'|format(algo_number) }} / 11</strong>
+        </div>
+        <div class="spec-record-item">
+          <span>Category</span>
+          <strong>{{ spec.category }}</strong>
+        </div>
+        <div class="spec-record-item">
+          <span>Model Type</span>
+          <strong>{{ spec.model_type }}</strong>
+        </div>
+        <div class="spec-record-item">
+          <span>Dataset File</span>
+          <strong class="code-pill">{{ spec.dataset_name }}</strong>
+        </div>
+        <div class="spec-record-item">
+          <span>Saved Artifact</span>
+          <strong class="code-pill">{{ spec.saved_model }}</strong>
+        </div>
+        <div class="spec-record-item">
+          <span>Expected Output</span>
+          <strong>{{ spec.expected_output }}</strong>
+        </div>
+      </div>
+
+      {% if spec.disclaimer %}
+      <div class="academic-disclaimer-box">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        <span><strong>Academic Use Disclaimer:</strong> {{ spec.disclaimer }}</span>
+      </div>
+      {% endif %}
+
+      <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--border-subtle); display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+        <a href="{{ url_for('training') }}?exp={{ key }}" class="card-action-btn" style="justify-content: center; font-size: 11px;">
+          <span>Train Model →</span>
+        </a>
+        <a href="{{ url_for('results', key=key) }}" class="card-action-btn" style="justify-content: center; font-size: 11px; background-color: var(--teal-50); color: var(--teal-700);">
+          <span>Evaluation Lab →</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(() => {
+  const sampleData = {{ spec.sample_data|tojson|safe if spec.sample_data else '{}' }};
+  const btnFill = document.getElementById('btnFillSample');
+
+  if (btnFill && sampleData) {
+    btnFill.addEventListener('click', () => {
+      for (const [fieldName, val] of Object.entries(sampleData)) {
+        const inputElem = document.getElementById(fieldName);
+        if (inputElem) {
+          inputElem.value = val;
+          inputElem.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

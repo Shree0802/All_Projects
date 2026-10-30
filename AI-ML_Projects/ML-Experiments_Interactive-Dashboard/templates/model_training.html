@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+
+{% block title %}Model Training Workspace | Integrated Machine Learning Laboratory Dashboard{% endblock %}
+{% block breadcrumb %}Model Training{% endblock %}
+
+{% block content %}
+<section class="detail-header-card">
+  <div class="detail-header-main">
+    <div class="hero-eyebrow">
+      <span class="badge-cat badge-cat-classification">LABORATORY TRAINING ENVIRONMENT</span>
+      <span>DYNAMIC EXPERIMENT PIPELINE</span>
+    </div>
+    <h1>Machine Learning Model Training Workspace</h1>
+    <p class="detail-header-desc">
+      Configure reproducible train/test splits, tune algorithm hyperparameters, fit models with zero data leakage, and inspect performance on held-out test data.
+    </p>
+  </div>
+  <div class="detail-huge-number">TRAIN</div>
+</section>
+
+<!-- Experiment Selection Toolbar -->
+<div class="toolbar-card" style="margin-top: 14px; margin-bottom: 20px;">
+  <div style="display: flex; align-items: center; gap: 12px; flex: 1; flex-wrap: wrap;">
+    <label for="experimentSelect" style="font-size: 12px; font-weight: 700; color: var(--navy-800);">
+      Select Algorithm to Train:
+    </label>
+    <select id="experimentSelect" class="form-input-control" style="max-width: 380px;">
+      {% for key, cfg in training_schemas.items() %}
+        <option value="{{ key }}" {% if key == selected_exp %}selected{% endif %}>
+          {{ cfg.title }} ({{ cfg.category }}) — {{ cfg.dataset_file }}
+        </option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div style="font-size: 11px; color: var(--slate-500);">
+    Newly trained models are saved to <code>models/trained/</code> without modifying base artifacts.
+  </div>
+</div>
+
+<div class="training-layout-grid">
+  <!-- Left Side: Dataset Inspection & Training Controls -->
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <div class="form-card">
+      <div class="form-panel-header">
+        <div>
+          <h2 class="form-panel-title" id="datasetTitle">Dataset & Pipeline Inspection</h2>
+          <span style="font-size: 11.5px; color: var(--slate-500);" id="datasetFilename">Loading metadata...</span>
+        </div>
+        <span class="code-pill" id="datasetRowsBadge">Loading...</span>
+      </div>
+
+      <!-- Quick Metrics Grid -->
+      <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
+        <div class="metric-stat-card" style="padding: 10px 12px;">
+          <span class="metric-stat-label">Total Rows</span>
+          <span class="metric-stat-number" id="statRows" style="font-size: 18px;">--</span>
+        </div>
+        <div class="metric-stat-card" style="padding: 10px 12px;">
+          <span class="metric-stat-label">Total Features</span>
+          <span class="metric-stat-number" id="statCols" style="font-size: 18px;">--</span>
+        </div>
+        <div class="metric-stat-card" style="padding: 10px 12px;">
+          <span class="metric-stat-label">Missing Values</span>
+          <span class="metric-stat-number" id="statMissing" style="font-size: 18px; color: var(--emerald-600);">0</span>
+        </div>
+        <div class="metric-stat-card" style="padding: 10px 12px;">
+          <span class="metric-stat-label">Target Column</span>
+          <span class="metric-stat-number" id="statTarget" style="font-size: 13px; color: var(--navy-800); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">--</span>
+        </div>
+      </div>
+
+      <!-- Training Split & Hyperparameters -->
+      <h4 style="font-size: 12.5px; font-weight: 800; color: var(--navy-900); margin-bottom: 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle);">
+        Training Configuration
+      </h4>
+
+      <form id="trainingConfigForm">
+        <div class="inputs-grid-layout">
+          <div class="form-field-group">
+            <label class="form-label" for="testSizeInput">Test Split Ratio (%)</label>
+            <select id="testSizeInput" class="form-input-control">
+              <option value="0.2">20% Testing (80% Training)</option>
+              <option value="0.25">25% Testing (75% Training)</option>
+              <option value="0.3">30% Testing (70% Training)</option>
+              <option value="0.15">15% Testing (85% Training)</option>
+            </select>
+          </div>
+
+          <div class="form-field-group">
+            <label class="form-label" for="randomSeedInput">Random State (Seed)</label>
+            <input type="number" id="randomSeedInput" class="form-input-control" value="42" min="0" max="9999">
+          </div>
+        </div>
+
+        <!-- Dynamic Hyperparameters Box -->
+        <div id="hyperparamsBox" style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;"></div>
+
+        <div style="margin-top: 20px;">
+          <button type="button" class="btn-primary-action" id="btnTrainModel" style="width: 100%; justify-content: center; padding: 13px;">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span>Train Model & Open Comprehensive Evaluation</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Right Side: Pipeline Details & Safety Guarantees -->
+  <div style="display: flex; flex-direction: column; gap: 20px;">
+    <div class="spec-record-box">
+      <h3 class="spec-record-title">Scientific Training Methodology</h3>
+      <div style="display: flex; flex-direction: column; gap: 10px; font-size: 12px; line-height: 1.6; color: var(--navy-800);">
+        <p>
+          <strong>Zero Data Leakage:</strong> All feature transformations and scaler estimations are strictly computed on <code>X_train</code> and applied onto <code>X_test</code>.
+        </p>
+        <p>
+          <strong>Stratified Splitting:</strong> Classification datasets apply stratified sampling to preserve original target class balances across train and test partitions.
+        </p>
+        <p>
+          <strong>Artifact Preservation:</strong> Original pre-trained model files are never overwritten; new training outputs are saved in <code>models/trained/</code> with full parameter metadata.
+        </p>
+        <p>
+          <strong>Direct Evaluation:</strong> Once training completes, the application automatically redirects to the unified results dashboard displaying all experiment-specific interactive Plotly charts.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(() => {
+  const selectExp = document.getElementById('experimentSelect');
+  const datasetTitle = document.getElementById('datasetTitle');
+  const datasetFilename = document.getElementById('datasetFilename');
+  const datasetRowsBadge = document.getElementById('datasetRowsBadge');
+  const statRows = document.getElementById('statRows');
+  const statCols = document.getElementById('statCols');
+  const statMissing = document.getElementById('statMissing');
+  const statTarget = document.getElementById('statTarget');
+  const hyperparamsBox = document.getElementById('hyperparamsBox');
+  const btnTrain = document.getElementById('btnTrainModel');
+
+  async function loadPreview(key) {
+    try {
+      const res = await fetch(`/api/dataset-preview/${key}`);
+      const data = await res.json();
+      if (data.error) return;
+
+      datasetTitle.textContent = `${data.title} Dataset Overview`;
+      datasetFilename.textContent = `File: datasets/${data.dataset_file} (${data.category})`;
+      datasetRowsBadge.textContent = `${data.rows} Rows`;
+
+      statRows.textContent = data.rows;
+      statCols.textContent = data.columns;
+      statMissing.textContent = data.missing_values;
+      statTarget.textContent = data.target;
+
+      renderHyperparams(key);
+    } catch (e) {
+      console.error(e);
+    }
+  }
+
+  function renderHyperparams(key) {
+    hyperparamsBox.innerHTML = '';
+    if (key === 'heart' || key === 'diabetes') {
+      hyperparamsBox.innerHTML = `
+        <div class="form-field-group">
+          <label class="form-label">Max Tree Depth</label>
+          <input type="number" id="hp_max_depth" class="form-input-control" value="5" min="1" max="50">
+        </div>
+        ${key === 'diabetes' ? `
+        <div class="form-field-group">
+          <label class="form-label">Number of Estimators</label>
+          <input type="number" id="hp_n_estimators" class="form-input-control" value="50" min="10" max="200">
+        </div>` : ''}
+      `;
+    } else if (key === 'breast') {
+      hyperparamsBox.innerHTML = `
+        <div class="form-field-group">
+          <label class="form-label">Number of Neighbors (K)</label>
+          <input type="number" id="hp_n_neighbors" class="form-input-control" value="5" min="1" max="25">
+        </div>
+      `;
+    } else if (key === 'linear_svm' || key === 'rbf_svm') {
+      hyperparamsBox.innerHTML = `
+        <div class="form-field-group">
+          <label class="form-label">Regularization Parameter (C)</label>
+          <input type="number" id="hp_C" class="form-input-control" value="1.0" step="0.1" min="0.1" max="100">
+        </div>
+      `;
+    }
+  }
+
+  btnTrain.addEventListener('click', async () => {
+    const key = selectExp.value;
+    const testSize = parseFloat(document.getElementById('testSizeInput').value) || 0.2;
+    const randomSeed = parseInt(document.getElementById('randomSeedInput').value, 10) || 42;
+
+    const hyperparams = {};
+    if (document.getElementById('hp_max_depth')) hyperparams.max_depth = document.getElementById('hp_max_depth').value;
+    if (document.getElementById('hp_n_estimators')) hyperparams.n_estimators = document.getElementById('hp_n_estimators').value;
+    if (document.getElementById('hp_n_neighbors')) hyperparams.n_neighbors = document.getElementById('hp_n_neighbors').value;
+    if (document.getElementById('hp_C')) hyperparams.C = document.getElementById('hp_C').value;
+
+    btnTrain.disabled = true;
+    btnTrain.innerHTML = `<span>Training Model & Generating Visualizations...</span>`;
+
+    try {
+      const res = await fetch('/api/train', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: key,
+          test_size: testSize,
+          random_state: randomSeed,
+          hyperparams: hyperparams
+        })
+      });
+
+      const data = await res.json();
+      if (data.success && data.results_url) {
+        window.location.href = data.results_url;
+      } else {
+        alert(data.error || 'Training failed.');
+        btnTrain.disabled = false;
+        btnTrain.innerHTML = `<span>Train Model & Open Comprehensive Evaluation</span>`;
+      }
+    } catch (err) {
+      alert('Training failed due to a server error.');
+      btnTrain.disabled = false;
+      btnTrain.innerHTML = `<span>Train Model & Open Comprehensive Evaluation</span>`;
+    }
+  });
+
+  selectExp.addEventListener('change', () => loadPreview(selectExp.value));
+  loadPreview(selectExp.value);
+})();
+</script>
+{% endblock %}

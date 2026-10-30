@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}About Project | Integrated Machine Learning Laboratory Dashboard{% endblock %}
+{% block breadcrumb %}About Project{% endblock %}
+
+{% block content %}
+<section class="project-info-card" id="project-info">
+  <div>
+    <h2 class="project-meta-heading">{{ student.project_title }}</h2>
+    <p class="project-text-paragraph">
+      <strong>Problem Statement:</strong> Develop a clean, user-friendly, and scientifically rigorous web application that consolidates Machine Learning laboratory experiments into one unified platform. The application enables students and faculty to explore datasets, train supported models with zero data leakage, execute live predictions, evaluate held-out performance metrics, and visualize complex decision boundaries through an integrated analytics dashboard.
+    </p>
+
+    <h3 style="font-size: 14px; font-weight: 700; color: var(--navy-900); margin-top: 20px; margin-bottom: 8px;">Laboratory Objectives</h3>
+    <ul class="objectives-list">
+      <li>
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Consolidate 11 Machine Learning practical experiments into a single cohesive platform.</span>
+      </li>
+      <li>
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Provide interactive prediction forms connected to validated pre-trained model artifacts.</span>
+      </li>
+      <li>
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Support explicit model training with configurable train/test splits and hyperparameter tuning.</span>
+      </li>
+      <li>
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Display verified evaluation metrics strictly calculated on held-out test data.</span>
+      </li>
+      <li>
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Generate specialized interactive scientific visualizations for every experiment (ROC curves, PR curves, 2D decision boundaries, residual plots, tree structures, feature importances).</span>
+      </li>
+      <li>
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Explore raw datasets with correlation heatmaps, feature distribution histograms, and summary statistics.</span>
+      </li>
+      <li>
+        <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Empirically compare compatible models on identical benchmarks.</span>
+      </li>
+    </ul>
+  </div>
+
+  <div>
+    <h2 class="project-meta-heading">Student & Academic Affiliation</h2>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 22px;">
+      <div>
+        <span class="contact-meta-label">Student Name</span>
+        <div class="contact-meta-value" style="font-weight: 800;">{{ student.name }}</div>
+      </div>
+      <div>
+        <span class="contact-meta-label">Roll Number</span>
+        <div class="contact-meta-value">{{ student.roll_no }}</div>
+      </div>
+      <div>
+        <span class="contact-meta-label">Academic Class</span>
+        <div class="contact-meta-value">{{ student.class }}</div>
+      </div>
+      <div>
+        <span class="contact-meta-label">Department / Course</span>
+        <div class="contact-meta-value">{{ student.course }}</div>
+      </div>
+      <div>
+        <span class="contact-meta-label">Subject</span>
+        <div class="contact-meta-value">{{ student.subject_lab }}</div>
+      </div>
+      <div>
+        <span class="contact-meta-label">College</span>
+        <div class="contact-meta-value">{{ student.college }}</div>
+      </div>
+      <div>
+        <span class="contact-meta-label">Email Address</span>
+        <div class="contact-meta-value"><a href="mailto:{{ student.email }}">{{ student.email }}</a></div>
+      </div>
+      <div>
+        <span class="contact-meta-label">Mobile Number</span>
+        <div class="contact-meta-value"><a href="tel:{{ student.phone }}">{{ student.phone }}</a></div>
+      </div>
+    </div>
+
+    <h3 style="font-size: 14px; font-weight: 700; color: var(--navy-900); margin-top: 14px; margin-bottom: 8px;">Technology Stack</h3>
+    <div class="tech-badge-container">
+      <span class="tech-tag-pill">Python 3.13</span>
+      <span class="tech-tag-pill">Flask 3.1</span>
+      <span class="tech-tag-pill">scikit-learn 1.6</span>
+      <span class="tech-tag-pill">Plotly 6.9</span>
+      <span class="tech-tag-pill">pandas 3.0</span>
+      <span class="tech-tag-pill">NumPy 2.3</span>
+      <span class="tech-tag-pill">joblib</span>
+      <span class="tech-tag-pill">HTML5 & CSS3</span>
+      <span class="tech-tag-pill">Vanilla JavaScript</span>
+    </div>
+
+    <div style="margin-top: 24px; padding: 12px; background-color: var(--teal-50); border: 1px solid var(--teal-100); border-radius: var(--radius-md);">
+      <div style="font-size: 11px; font-weight: 700; color: var(--teal-700); margin-bottom: 4px;">Institutional Logo Integrity</div>
+      <p style="font-size: 11px; color: var(--navy-800); line-height: 1.5; margin: 0;">
+        The official D. Y. Patil College of Engineering and Technology emblem is embedded locally at <code>static/images/college-logo.png</code>, ensuring zero external network dependency and strict aspect ratio preservation.
+      </p>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}Academic Lab Reports - {{ spec.title }}{% endblock %}
+{% block breadcrumb %}Lab Reports / {{ spec.title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-pre">AUTOMATIC LAB REPORT GENERATION</div>
+  <h1 class="page-header-title">Academic Experiment Submission Report</h1>
+  <p class="page-header-sub">
+    Generate, preview, customize, and download publication-standard Machine Learning Laboratory experiment reports formatted for academic practical submissions and viva portfolios.
+  </p>
+</div>
+
+<!-- Algorithm Selector Pill Bar -->
+<div class="tabs-nav" style="margin-bottom: 24px; overflow-x: auto; white-space: nowrap; padding-bottom: 6px;">
+  {% for k, a in algorithms.items() %}
+    <a href="{{ url_for('reports', key=k) }}" class="tab-item {% if k == key %}active{% endif %}">
+      <span class="tab-badge" style="font-size: 10px;">{{ a.num }}</span>
+      {{ a.title }}
+    </a>
+  {% endfor %}
+</div>
+
+<!-- Report Configuration & Export Action Bar -->
+<div class="card" style="margin-bottom: 24px;">
+  <div class="card-header">
+    <div class="card-title-group">
+      <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></div>
+      <div>
+        <h2 class="card-title">Report Configuration & Download Options</h2>
+        <p class="card-subtitle">Experiment {{ spec.num }}: {{ spec.title }} ({{ run.metadata.category }})</p>
+      </div>
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+      <a href="{{ url_for('api_export_pdf', key=key) }}" class="btn btn-primary btn-sm" id="btnDownloadPdf">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 14px; height: 14px; margin-right: 4px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download PDF Report
+      </a>
+      <a href="{{ url_for('api_export_report', key=key, format='csv') }}" class="btn btn-secondary btn-sm">
+        Export CSV
+      </a>
+      <a href="{{ url_for('api_export_report', key=key, format='json') }}" class="btn btn-secondary btn-sm">
+        Export JSON
+      </a>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div style="background: var(--slate-50); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 14px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <span style="font-size: 13px; font-weight: 600; color: var(--navy-900);">Student Profile:</span>
+        <span style="font-size: 13px; color: var(--navy-800);">{{ student.name }} ({{ student.class }}, Roll: {{ student.roll_no }})</span>
+      </div>
+      <div style="font-size: 12px; color: var(--slate-500);">
+        Execution Timestamp: <strong>{{ run.metadata.timestamp }}</strong> | Duration: <strong>{{ run.metadata.duration_ms }} ms</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Printable Live Academic Report Document Preview -->
+<div class="card" style="background: var(--card-bg); border: 1px solid var(--border-color); box-shadow: var(--shadow-md);">
+  <div class="card-body" style="padding: 36px 40px; font-family: var(--font-body); color: var(--navy-900);">
+    
+    <!-- Institutional Document Header -->
+    <div style="display: flex; align-items: center; gap: 20px; border-bottom: 2px solid var(--navy-900); padding-bottom: 16px; margin-bottom: 20px;">
+      <div style="width: 72px; height: 72px; flex-shrink: 0; background: #ffffff; padding: 4px; border-radius: 8px; border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center;">
+        <img src="{{ url_for('static', filename='images/college-logo.png') }}" alt="DYPCET Logo" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+      </div>
+      <div style="flex: 1;">
+        <h2 style="font-size: 18px; font-weight: 800; text-transform: uppercase; color: var(--navy-900); letter-spacing: 0.5px; margin-bottom: 4px;">
+          {{ student.college }}
+        </h2>
+        <div style="font-size: 13px; color: var(--slate-600); font-weight: 500;">
+          {{ student.location }} | Department of {{ student.course }}
+        </div>
+        <div style="font-size: 12px; font-weight: 700; color: var(--teal-600); margin-top: 4px; letter-spacing: 0.5px;">
+          {{ student.subject_lab|upper }} — EXPERIMENT LABORATORY RECORD
+        </div>
+      </div>
+    </div>
+
+    <!-- Credentials Table -->
+    <table class="data-table" style="margin-bottom: 20px; font-size: 13px;">
+      <tbody>
+        <tr>
+          <td style="width: 20%; font-weight: 700; background: var(--slate-50);">Student Name</td>
+          <td style="width: 30%;">{{ student.name }}</td>
+          <td style="width: 20%; font-weight: 700; background: var(--slate-50);">Experiment No.</td>
+          <td style="width: 30%;"><strong>Experiment {{ spec.num }}</strong></td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700; background: var(--slate-50);">Class / Roll No.</td>
+          <td>{{ student.class }} / {{ student.roll_no }}</td>
+          <td style="font-weight: 700; background: var(--slate-50);">Subject</td>
+          <td>{{ student.subject }}</td>
+        </tr>
+        <tr>
+          <td style="font-weight: 700; background: var(--slate-50);">Algorithm</td>
+          <td>{{ spec.title }}</td>
+          <td style="font-weight: 700; background: var(--slate-50);">Execution Date</td>
+          <td>{{ run.metadata.timestamp }}</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- 1. Aim & Objectives -->
+    <div style="margin-bottom: 20px;">
+      <h3 style="font-size: 14px; font-weight: 800; color: var(--navy-900); text-transform: uppercase; margin-bottom: 8px; border-left: 3px solid var(--teal-600); padding-left: 8px;">
+        1. Aim & Objectives
+      </h3>
+      <p style="font-size: 13px; line-height: 1.6; color: var(--navy-800); margin-bottom: 6px;">
+        <strong>Aim:</strong> To implement, fit, evaluate, and interpret <strong>{{ spec.title }}</strong> on the <i>{{ run.metadata.dataset }}</i> dataset, evaluating generalization metrics on held-out test partitions.
+      </p>
+      <p style="font-size: 13px; line-height: 1.6; color: var(--navy-800);">
+        <strong>Learning Objectives:</strong> (1) Understand algorithmic loss minimization. (2) Prepare datasets with zero test data leakage. (3) Measure empirical performance using held-out test metrics. (4) Interpret feature attributions and decision boundaries.
+      </p>
+    </div>
+
+    <!-- 2. Mathematical & Algorithmic Foundation -->
+    <div style="margin-bottom: 20px;">
+      <h3 style="font-size: 14px; font-weight: 800; color: var(--navy-900); text-transform: uppercase; margin-bottom: 8px; border-left: 3px solid var(--teal-600); padding-left: 8px;">
+        2. Mathematical Formulation
+      </h3>
+      <div style="background: var(--slate-50); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px; font-family: var(--font-mono); font-size: 12px; line-height: 1.6; margin-bottom: 8px;">
+        {{ learning.math_formula }}
+      </div>
+      <p style="font-size: 12px; color: var(--slate-600);">
+        <strong>Optimization / Cost Criterion:</strong> {{ learning.cost_function }}
+      </p>
+    </div>
+
+    <!-- 3. Dataset & Preprocessing Methodology -->
+    <div style="margin-bottom: 20px;">
+      <h3 style="font-size: 14px; font-weight: 800; color: var(--navy-900); text-transform: uppercase; margin-bottom: 8px; border-left: 3px solid var(--teal-600); padding-left: 8px;">
+        3. Dataset & Preprocessing Pipeline
+      </h3>
+      <table class="data-table" style="font-size: 12px;">
+        <tbody>
+          <tr>
+            <td style="font-weight: 700; width: 25%; background: var(--slate-50);">Benchmark Dataset</td>
+            <td style="width: 25%;">{{ run.metadata.dataset }}</td>
+            <td style="font-weight: 700; width: 25%; background: var(--slate-50);">Target Variable</td>
+            <td style="width: 25%;">{{ run.metadata.target }}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 700; background: var(--slate-50);">Sample Split</td>
+            <td>{{ run.metadata.train_samples }} Train / {{ run.metadata.test_samples }} Test</td>
+            <td style="font-weight: 700; background: var(--slate-50);">Split Ratio</td>
+            <td>{{ ((1 - run.metadata.test_size)*100)|round|int }}% Train : {{ (run.metadata.test_size*100)|round|int }}% Test</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 700; background: var(--slate-50);">Input Features</td>
+            <td colspan="3">{{ run.metadata.features | join(', ') }}</td>
+          </tr>
+          <tr>
+            <td style="font-weight: 700; background: var(--slate-50);">Data Leakage Safeguard</td>
+            <td colspan="3">Strictly fitted on training fold only; no test information used during model optimization.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 4. Actual Evaluation Metrics Table -->
+    <div style="margin-bottom: 20px;">
+      <h3 style="font-size: 14px; font-weight: 800; color: var(--navy-900); text-transform: uppercase; margin-bottom: 8px; border-left: 3px solid var(--teal-600); padding-left: 8px;">
+        4. Held-Out Evaluation Metrics
+      </h3>
+      <table class="data-table" style="font-size: 12px;">
+        <thead>
+          <tr>
+            <th>Evaluation Metric</th>
+            <th>Empirical Value</th>
+            <th>Interpretation Criterion</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if run.metadata.category == 'Regression' %}
+            <tr>
+              <td><strong>R² Score (Coefficient of Determination)</strong></td>
+              <td><span class="badge badge-success">{{ run.metrics.r2_score }}</span></td>
+              <td>Proportion of target variance explained by fitted model (Max: 1.0)</td>
+            </tr>
+            <tr>
+              <td><strong>Mean Absolute Error (MAE)</strong></td>
+              <td><strong>{{ run.metrics.mae }}</strong></td>
+              <td>Average absolute error magnitude in target units (Lower is better)</td>
+            </tr>
+            <tr>
+              <td><strong>Root Mean Squared Error (RMSE)</strong></td>
+              <td><strong>{{ run.metrics.rmse }}</strong></td>
+              <td>Root mean squared deviation; heavily penalizes outlier errors</td>
+            </tr>
+            <tr>
+              <td><strong>Mean Squared Error (MSE)</strong></td>
+              <td><strong>{{ run.metrics.mse }}</strong></td>
+              <td>Variance of prediction residuals</td>
+            </tr>
+          {% else %}
+            <tr>
+              <td><strong>Overall Accuracy</strong></td>
+              <td><span class="badge badge-success">{{ run.metrics.accuracy }}%</span></td>
+              <td>Ratio of correct test classifications over total test samples</td>
+            </tr>
+            <tr>
+              <td><strong>Precision (Weighted)</strong></td>
+              <td><strong>{{ run.metrics.precision }}%</strong></td>
+              <td>Ratio of true positive detections over total positive predictions</td>
+            </tr>
+            <tr>
+              <td><strong>Recall / Sensitivity (Weighted)</strong></td>
+              <td><strong>{{ run.metrics.recall }}%</strong></td>
+              <td>Ratio of actual positive cases successfully identified</td>
+            </tr>
+            <tr>
+              <td><strong>F1-Score (Harmonic Mean)</strong></td>
+              <td><strong>{{ run.metrics.f1_score }}%</strong></td>
+              <td>Harmonic mean of precision and recall (robust to class imbalance)</td>
+            </tr>
+            {% if run.metrics.roc_auc %}
+              <tr>
+                <td><strong>Area Under ROC Curve (AUC)</strong></td>
+                <td><strong>{{ run.metrics.roc_auc }}</strong></td>
+                <td>Discriminative ability across all possible classification thresholds</td>
+              </tr>
+            {% endif %}
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- 5. Observations & Conclusion -->
+    <div style="margin-bottom: 28px;">
+      <h3 style="font-size: 14px; font-weight: 800; color: var(--navy-900); text-transform: uppercase; margin-bottom: 8px; border-left: 3px solid var(--teal-600); padding-left: 8px;">
+        5. Observations & Practical Conclusion
+      </h3>
+      <p style="font-size: 13px; line-height: 1.6; color: var(--navy-800); margin-bottom: 6px;">
+        {{ xai.practical }}
+      </p>
+      <p style="font-size: 13px; line-height: 1.6; color: var(--navy-800);">
+        <strong>Conclusion:</strong> The <strong>{{ spec.title }}</strong> algorithm successfully converged on the training partition with a latency of {{ run.metadata.duration_ms }} ms and generalized effectively to held-out test instances.
+      </p>
+    </div>
+
+    <!-- Sign-off Block -->
+    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 40px; padding-top: 20px; border-top: 1px dashed var(--border-color);">
+      <div>
+        <div style="border-top: 1px solid var(--navy-900); width: 200px; padding-top: 4px; font-size: 12px; font-weight: 700; color: var(--navy-900);">
+          Student Signature
+        </div>
+        <div style="font-size: 11px; color: var(--slate-500);">{{ student.name }} ({{ student.roll_no }})</div>
+      </div>
+      <div style="text-align: right;">
+        <div style="border-top: 1px solid var(--navy-900); width: 220px; padding-top: 4px; font-size: 12px; font-weight: 700; color: var(--navy-900);">
+          Faculty In-Charge Signature
+        </div>
+        <div style="font-size: 11px; color: var(--slate-500);">Department of AIML, DYPCET</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

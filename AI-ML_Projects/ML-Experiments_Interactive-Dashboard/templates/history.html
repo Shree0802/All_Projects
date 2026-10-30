@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Experiment Training History | ML Laboratory{% endblock %}
+{% block breadcrumb %}Training History{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-pre">MODULE NINE — PERSISTENT AUDIT TRAIL</div>
+  <h1 class="page-header-title">Model Execution & Artifact History</h1>
+  <p class="page-header-sub">
+    Review persistent records of past model training runs, fitted hyperparameters, held-out validation scores, and serialized artifacts in <code>models/trained/</code>.
+  </p>
+</div>
+
+<!-- History Stats Ribbon -->
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px;">
+  <div class="card">
+    <div class="card-body" style="padding: 16px;">
+      <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--slate-500); margin-bottom: 4px;">Total Logged Runs</div>
+      <div style="font-size: 24px; font-weight: 800; color: var(--navy-900);">{{ stats.total_records }}</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body" style="padding: 16px;">
+      <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--slate-500); margin-bottom: 4px;">Session Interactive Trains</div>
+      <div style="font-size: 24px; font-weight: 800; color: var(--teal-600);">{{ stats.session_train_count }}</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-body" style="padding: 16px;">
+      <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--slate-500); margin-bottom: 4px;">Last Activity</div>
+      <div style="font-size: 14px; font-weight: 700; color: var(--navy-900); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+        {{ stats.last_activity }}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- History Records Table -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-title-group">
+      <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+      <div>
+        <h2 class="card-title">Training Execution Audit Log</h2>
+        <p class="card-subtitle">Every entry records verifiable empirical evaluation on held-out test splits</p>
+      </div>
+    </div>
+    <span class="badge" style="background: var(--slate-100); color: var(--slate-700);">JSON Storage</span>
+  </div>
+
+  <div class="card-body">
+    <div style="overflow-x: auto;">
+      <table class="data-table" style="font-size: 12px;">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Experiment</th>
+            <th>Category</th>
+            <th>Algorithm</th>
+            <th>Dataset</th>
+            <th>Key Held-Out Metric</th>
+            <th>Artifact Location</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in history_records %}
+          <tr id="row-{{ r.id }}">
+            <td><small style="font-family: var(--font-mono); color: var(--slate-500);">{{ r.timestamp }}</small></td>
+            <td><strong>{{ r.experiment_title }}</strong></td>
+            <td>
+              <span class="badge {% if r.category == 'Regression' %}badge-secondary{% else %}badge-primary{% endif %}">
+                {{ r.category }}
+              </span>
+            </td>
+            <td><small>{{ r.algorithm }}</small></td>
+            <td><code>{{ r.dataset }}</code></td>
+            <td>
+              {% if r.category == 'Regression' %}
+                <span class="badge badge-success">R²: {{ r.metrics.r2_score }}</span> <small style="color: var(--slate-500);">(RMSE: {{ r.metrics.rmse }})</small>
+              {% else %}
+                <span class="badge badge-success">Acc: {{ r.metrics.accuracy }}%</span> <small style="color: var(--slate-500);">(F1: {{ r.metrics.f1_score }}%)</small>
+              {% endif %}
+            </td>
+            <td><small style="font-family: var(--font-mono); color: var(--slate-600);">{{ r.artifact_path }}</small></td>
+            <td>
+              <div style="display: flex; gap: 6px; align-items: center;">
+                <a href="{{ url_for('results', key=r.experiment_key) }}" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 2px 6px;">
+                  Results
+                </a>
+                <a href="{{ url_for('api_export_pdf', key=r.experiment_key) }}" class="btn btn-secondary btn-sm" style="font-size: 11px; padding: 2px 6px;">
+                  PDF
+                </a>
+                {% if not r.is_baseline %}
+                  <button type="button" class="btn btn-danger btn-sm" style="font-size: 11px; padding: 2px 6px;" onclick="deleteHistoryRun('{{ r.id }}')">
+                    Delete
+                  </button>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function deleteHistoryRun(id) {
+  if (!confirm("Are you sure you want to delete this recorded training run and its serialized artifact?")) {
+    return;
+  }
+  try {
+    const res = await fetch("/api/delete-history/" + encodeURIComponent(id), { method: "POST" });
+    const data = await res.json();
+    if (data.success) {
+      const row = document.getElementById("row-" + id);
+      if (row) row.remove();
+    } else {
+      alert("Failed to delete record: " + (data.error || "Unknown error"));
+    }
+  } catch (err) {
+    alert("Request error: " + err);
+  }
+}
+</script>
+{% endblock %}

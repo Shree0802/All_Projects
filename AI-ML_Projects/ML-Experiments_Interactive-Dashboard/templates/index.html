@@ -1,0 +1,310 @@
+{% extends "base.html" %}
+
+{% block title %}Overview | Integrated Machine Learning Laboratory Dashboard{% endblock %}
+{% block breadcrumb %}Overview{% endblock %}
+
+{% block content %}
+<!-- ===================================================================
+     1. STUDENT PROJECT PROFILE CARD (GUARANTEED NO OVERLAP)
+     =================================================================== -->
+<section class="student-profile-card" id="student-profile" aria-label="Student Identity Information">
+  <div class="student-identity-left">
+    <div class="college-logo-container">
+      <img src="{{ url_for('static', filename='images/college-logo.png') }}" 
+           alt="D. Y. Patil College of Engineering and Technology logo" 
+           class="college-logo-img">
+    </div>
+    <div class="student-photo-container" title="Prathamesh Balaji Patil - Profile Photograph">
+      <img src="{{ url_for('static', filename='images/profile.jpg') }}" 
+           alt="Prathamesh Balaji Patil profile photograph" 
+           class="student-photo-img">
+    </div>
+    <div class="student-info-block">
+      <div class="student-eyebrow">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        STUDENT PROJECT PROFILE
+      </div>
+      <h1 class="student-name-heading">{{ student.name }}</h1>
+      <div class="student-college-line">{{ student.college }}</div>
+      <div class="student-location-line">{{ student.location }}</div>
+      <div class="student-pill-row">
+        <span class="student-tag tag-primary">{{ student.course }}</span>
+        <span class="student-tag">{{ student.class }}</span>
+        <span class="student-tag">Roll: {{ student.roll_no }}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="student-contact-right">
+    <div class="contact-meta-item">
+      <span class="contact-meta-label">Roll Number</span>
+      <span class="contact-meta-value">{{ student.roll_no }}</span>
+    </div>
+    <div class="contact-meta-item">
+      <span class="contact-meta-label">Subject</span>
+      <span class="contact-meta-value">{{ student.subject }}</span>
+    </div>
+    <div class="contact-meta-item">
+      <span class="contact-meta-label">Email Address</span>
+      <span class="contact-meta-value"><a href="mailto:{{ student.email }}">{{ student.email }}</a></span>
+    </div>
+    <div class="contact-meta-item">
+      <span class="contact-meta-label">Mobile Number</span>
+      <span class="contact-meta-value"><a href="tel:{{ student.phone }}">{{ student.phone }}</a></span>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================
+     1B. STUDY MATERIALS & SOCIAL MEDIA PROFILES BANNER
+     =================================================================== -->
+<section class="connect-banner-card" aria-label="Study Materials and Developer Profiles">
+  <div class="connect-banner-left">
+    <div class="connect-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      STUDY MATERIALS &amp; RESOURCES
+    </div>
+    <h3 class="connect-title">Study Materials &amp; Connect With Me</h3>
+    <p class="connect-desc">
+      Looking for Machine Learning study materials, practicals, datasets, source code, and experiment resources? All learning materials related to this dashboard are available in my GitHub repository. Feel free to explore and use them for your learning.
+    </p>
+  </div>
+  <div class="connect-actions-right">
+    <a href="https://github.com/Shree0802/Machine-Learning_Experiments" 
+       target="_blank" 
+       rel="noopener noreferrer" 
+       class="btn-social btn-github-primary"
+       title="Explore all Machine Learning study materials on GitHub">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+      <span>Explore All Study Materials on GitHub</span>
+    </a>
+    <div class="social-pills-row">
+      <a href="https://github.com/Shree0802/Machine-Learning_Experiments" 
+         target="_blank" 
+         rel="noopener noreferrer" 
+         class="btn-social btn-social-pill btn-github-pill"
+         title="Visit GitHub Repository">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" clip-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
+        <span>GitHub Repository</span>
+      </a>
+      <a href="https://www.linkedin.com/in/prathamesh-patil1718" 
+         target="_blank" 
+         rel="noopener noreferrer" 
+         class="btn-social btn-social-pill btn-linkedin-pill"
+         title="Visit LinkedIn Profile">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/></svg>
+        <span>LinkedIn Profile</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================
+     2. COMPACT HERO SECTION & LABORATORY SUMMARY CARDS
+     =================================================================== -->
+<section class="hero-card" id="overview">
+  <div class="hero-main-content">
+    <div class="hero-eyebrow">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><circle cx="19" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><line x1="12" y1="9" x2="18.5" y2="6.5"/><line x1="12" y1="15" x2="5.5" y2="18.5"/></svg>
+      ONE WORKSPACE. MULTIPLE MODELS.
+    </div>
+    <h2 class="hero-title">{{ student.project_title }}</h2>
+    <p class="hero-subtitle">
+      Explore, execute, and analyse machine learning laboratory experiments through one unified application powered by trained models, real datasets, and interactive scientific visualizations.
+    </p>
+    <div class="hero-actions-row">
+      <a href="{{ url_for('experiments') }}" class="btn-primary-action">
+        <span>Explore All 12 Experiments</span>
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg>
+      </a>
+      <a href="{{ url_for('training') }}" class="btn-secondary-action">
+        <span>Model Training Lab</span>
+      </a>
+      <a href="{{ url_for('explainability') }}" class="btn-secondary-action">
+        <span>Explainable AI (XAI)</span>
+      </a>
+      <a href="{{ url_for('reports') }}" class="btn-secondary-action">
+        <span>Lab Reports (PDF)</span>
+      </a>
+      <a href="{{ url_for('comparison') }}" class="btn-secondary-action">
+        <span>Model Comparison</span>
+      </a>
+      <a href="{{ url_for('learning') }}" class="btn-secondary-action">
+        <span>Viva Prep & Theory</span>
+      </a>
+    </div>
+  </div>
+
+  <!-- Verified Statistics Row -->
+  <div class="hero-stats-row" style="grid-template-columns: repeat(4, minmax(0, 1fr));">
+    <div class="stat-box">
+      <div class="stat-icon-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">12</span>
+        <span class="stat-label">Total Laboratory Modules</span>
+      </div>
+    </div>
+
+    <div class="stat-box">
+      <div class="stat-icon-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ regression_count }} / {{ classification_count }}</span>
+        <span class="stat-label">Regression / Classification</span>
+      </div>
+    </div>
+
+    <div class="stat-box">
+      <div class="stat-icon-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ available_saved_models }} Models</span>
+        <span class="stat-label">Verified Pre-Trained Artifacts</span>
+      </div>
+    </div>
+
+    <div class="stat-box">
+      <div class="stat-icon-wrap">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      </div>
+      <div class="stat-content">
+        <span class="stat-value">{{ datasets_count }} Datasets</span>
+        <span class="stat-label">Benchmark CSV Files</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================================================================
+     3. RECENT ACTIVITY & METRIC SUMMARY
+     =================================================================== -->
+<div style="display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(320px, 0.9fr); gap: 24px;">
+  <!-- Recent Training Events -->
+  <div class="form-card">
+    <div class="form-panel-header">
+      <div>
+        <h3 class="form-panel-title">Recent Training & Evaluation Activity</h3>
+        <span style="font-size: 11.5px; color: var(--slate-500);">Actual training runs recorded during laboratory sessions.</span>
+      </div>
+      <a href="{{ url_for('history') }}" class="btn-sample-fill">View Full History →</a>
+    </div>
+
+    <div class="table-responsive-container">
+      <table class="data-spec-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Experiment</th>
+            <th>Algorithm</th>
+            <th>Held-out Metric</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in recent_history %}
+          <tr>
+            <td><small class="code-pill">{{ r.timestamp }}</small></td>
+            <td><strong>{{ r.experiment_title }}</strong></td>
+            <td><small>{{ r.algorithm }}</small></td>
+            <td>
+              {% if r.category == 'Regression' %}
+                <span class="student-tag tag-primary">R²: {{ r.metrics.r2_score }}</span>
+              {% else %}
+                <span class="student-tag tag-primary">Acc: {{ r.metrics.accuracy }}%</span>
+              {% endif %}
+            </td>
+            <td>
+              <span class="badge-cat {% if r.is_baseline %}badge-cat-regression{% else %}badge-cat-classification{% endif %}">
+                {{ r.status }}
+              </span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Laboratory Quick Start Guide -->
+  <div class="spec-record-box">
+    <h3 class="spec-record-title">Laboratory Workflow Guidelines</h3>
+    <div style="display: flex; flex-direction: column; gap: 12px; font-size: 12px; color: var(--navy-800);">
+      <div style="display: flex; gap: 10px; align-items: flex-start;">
+        <span class="exp-num-badge">1</span>
+        <div>
+          <strong>Explore Datasets:</strong> Inspect raw features, data distributions, correlation heatmaps, and missing values in the Dataset Explorer.
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: flex-start;">
+        <span class="exp-num-badge">2</span>
+        <div>
+          <strong>Train & Tune:</strong> Configure stratified train/test splits and algorithm hyperparameters without data leakage.
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: flex-start;">
+        <span class="exp-num-badge">3</span>
+        <div>
+          <strong>Evaluate with Visualizations:</strong> Inspect held-out performance, ROC curves, residual errors, and decision boundaries.
+        </div>
+      </div>
+      <div style="display: flex; gap: 10px; align-items: flex-start;">
+        <span class="exp-num-badge">4</span>
+        <div>
+          <strong>Compare Models:</strong> Benchmark comparable models side-by-side on compatible data splits.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================================================================
+     4. EXPERIMENT PREVIEWS (QUICK ACCESS GRID)
+     =================================================================== -->
+<div class="section-header-block" style="margin-top: 12px;">
+  <div>
+    <h2 class="section-title">Laboratory Experiments (01—11)</h2>
+    <p class="section-desc">Consolidated machine learning algorithms with pre-trained models and verified evaluation pipelines.</p>
+  </div>
+  <a href="{{ url_for('experiments') }}" class="btn-sample-fill">Open Filterable Library →</a>
+</div>
+
+<div class="experiments-grid" style="margin-top: 14px;">
+  {% for key, item in algorithms.items() %}
+  <article class="experiment-card">
+    <div class="card-top-row">
+      <span class="exp-num-badge">EXP {{ item.num }}</span>
+      <span class="badge-cat {{ 'badge-cat-regression' if item.category == 'Regression' else 'badge-cat-classification' }}">
+        {{ item.category }}
+      </span>
+    </div>
+
+    <h3 class="card-algo-title">{{ item.title }}</h3>
+    <p class="card-algo-desc">{{ item.description }}</p>
+
+    <div class="card-meta-list">
+      <div class="card-meta-row">
+        <span class="card-meta-k">Input</span>
+        <span class="card-meta-v">{{ item.input_feature }}</span>
+      </div>
+      <div class="card-meta-row">
+        <span class="card-meta-k">Dataset</span>
+        <span class="card-meta-v">{{ item.dataset_name }}</span>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+      <a href="{{ url_for('algorithm', key=key) }}" class="card-action-btn" style="justify-content: center;">
+        <span>Predict</span>
+      </a>
+      <a href="{{ url_for('results', key=key) }}" class="card-action-btn" style="justify-content: center; background-color: var(--teal-50); color: var(--teal-700);">
+        <span>Evaluate</span>
+      </a>
+    </div>
+  </article>
+  {% endfor %}
+</div>
+{% endblock %}

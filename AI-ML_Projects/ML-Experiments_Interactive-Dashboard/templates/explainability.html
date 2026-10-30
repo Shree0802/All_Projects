@@ -1,0 +1,293 @@
+{% extends "base.html" %}
+
+{% block title %}Explainable AI (XAI) Lab - {{ spec.title }}{% endblock %}
+{% block breadcrumb %}Explainable AI / {{ spec.title }}{% endblock %}
+
+{% block content %}
+<div class="page-header" style="margin-bottom: 20px;">
+  <div class="page-header-pre">EXPLAINABLE MACHINE LEARNING (XAI) STUDIO</div>
+  <h1 class="page-header-title">Model Interpretability & Feature Attribution</h1>
+  <p class="page-header-sub">
+    Deconstruct how algorithmic predictions are formed using global feature importances, mathematical weights, local decision paths, counterfactual what-if reasoning, and multi-tier educational explanations.
+  </p>
+</div>
+
+<!-- 12-Module Navigation Pill Bar -->
+<div class="tabs-nav" style="margin-bottom: 24px; overflow-x: auto; white-space: nowrap; padding-bottom: 6px;">
+  {% for k, a in algorithms.items() %}
+    <a href="{{ url_for('explainability', key=k) }}" class="tab-item {% if k == key %}active{% endif %}">
+      <span class="tab-badge" style="font-size: 10px;">{{ a.num }}</span>
+      {{ a.title }}
+    </a>
+  {% endfor %}
+</div>
+
+<!-- 3-Tier Multi-Level Educational Panels -->
+<div class="card" style="margin-bottom: 24px;">
+  <div class="card-header">
+    <div class="card-title-group">
+      <div class="card-icon">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      </div>
+      <div>
+        <h2 class="card-title">3-Tier Multi-Level Explanation: {{ spec.title }}</h2>
+        <p class="card-subtitle">Designed for engineering viva voce examinations and faculty demonstrations</p>
+      </div>
+    </div>
+    <span class="badge" style="background: var(--teal-50); color: var(--teal-700); border: 1px solid var(--teal-200); font-weight: 600;">Exp {{ spec.num }}</span>
+  </div>
+
+  <div class="card-body">
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+      <!-- Beginner Tier -->
+      <div style="background: var(--slate-50); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 18px; display: flex; flex-direction: column;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+          <span style="background: var(--emerald-100); color: var(--emerald-700); font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: var(--radius-full);">TIER 1: INTUITION</span>
+          <span style="font-weight: 600; font-size: 13px; color: var(--navy-900);">Conceptual Analogy</span>
+        </div>
+        <p style="font-size: 13px; line-height: 1.6; color: var(--navy-800); flex: 1;">{{ xai_tier.beginner }}</p>
+      </div>
+
+      <!-- Technical Tier -->
+      <div style="background: var(--slate-50); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 18px; display: flex; flex-direction: column;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+          <span style="background: var(--sky-100); color: var(--sky-700); font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: var(--radius-full);">TIER 2: FORMULATION</span>
+          <span style="font-weight: 600; font-size: 13px; color: var(--navy-900);">Mathematical Logic</span>
+        </div>
+        <p style="font-size: 12.5px; line-height: 1.6; font-family: var(--font-mono); color: var(--navy-800); flex: 1;">{{ xai_tier.technical }}</p>
+      </div>
+
+      <!-- Practical Tier -->
+      <div style="background: var(--slate-50); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 18px; display: flex; flex-direction: column;">
+        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px;">
+          <span style="background: var(--amber-100); color: var(--amber-700); font-weight: 700; font-size: 11px; padding: 3px 8px; border-radius: var(--radius-full);">TIER 3: APPLICATION</span>
+          <span style="font-weight: 600; font-size: 13px; color: var(--navy-900);">Laboratory Context</span>
+        </div>
+        <p style="font-size: 13px; line-height: 1.6; color: var(--navy-800); flex: 1;">{{ xai_tier.practical }}</p>
+        <div style="margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border-color); font-size: 12px; color: var(--slate-600);">
+          <strong style="color: var(--navy-900);">Key Assumption / Limitation:</strong> {{ xai_tier.limitations }}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="grid-2-col" style="margin-bottom: 24px;">
+  <!-- Global Feature Importance Chart -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title-group">
+        <div class="card-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+        </div>
+        <div>
+          <h2 class="card-title">Global Feature Importance</h2>
+          <p class="card-subtitle">Method: {{ global_imp.method }}</p>
+        </div>
+      </div>
+      <span class="badge" style="background: var(--teal-100); color: var(--teal-800); font-weight: 600;">Normalized %</span>
+    </div>
+    <div class="card-body">
+      <div id="chart-global-importance" style="width: 100%; height: 320px; max-height: 320px;"></div>
+      <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px 14px; margin-top: 12px; font-size: 11.5px; color: var(--slate-600); line-height: 1.5;">
+        <strong style="color: var(--navy-900);">Interpretability Guideline:</strong> Higher importance indicates stronger empirical association with the target variable across the entire training corpus. Features with shared multicollinearity may distribute attribution scores.
+      </div>
+    </div>
+  </div>
+
+  <!-- Local Prediction Explainer -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title-group">
+        <div class="card-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        </div>
+        <div>
+          <h2 class="card-title">Local Instance Attribution Explainer</h2>
+          <p class="card-subtitle">Analyze instance decisions, feature contributions, and counterfactuals</p>
+        </div>
+      </div>
+      <button class="btn btn-secondary btn-sm" id="btnAutofillXAI" type="button">Autofill Preset</button>
+    </div>
+
+    <div class="card-body">
+      <form id="xaiExplainForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 12px; margin-bottom: 16px;">
+        {% for field in spec.fields[:6] %}
+          <div class="form-group" style="margin-bottom: 0;">
+            <label class="form-label" style="font-size: 11px;">{{ field[1] }}</label>
+            <input
+              type="{{ field[2] }}"
+              step="{{ field[3] }}"
+              name="{{ field[0] }}"
+              id="xai_{{ field[0] }}"
+              class="form-control form-control-sm"
+              placeholder="{{ field[4] }}"
+              value="{{ spec.sample_data[field[0]] if spec.sample_data else '' }}"
+              required
+            >
+          </div>
+        {% endfor %}
+      </form>
+
+      <button class="btn btn-primary btn-sm" id="btnRunLocalExplain" type="button" style="width: 100%;">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 15px; height: 15px; margin-right: 6px;"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        Explain Instance Prediction
+      </button>
+
+      <!-- Local Attribution Output Box -->
+      <div id="localExplainOutput" style="margin-top: 16px; display: none; background: #ffffff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
+        <!-- Prediction Verdict Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border-color);">
+          <div>
+            <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--slate-500); font-weight: 600;">Predicted Verdict:</span>
+            <span id="xaiPredBadge" style="margin-left: 6px; font-weight: 700; font-size: 13px; color: var(--teal-700); background: var(--teal-50); border: 1px solid var(--teal-200); padding: 2px 8px; border-radius: 4px;">--</span>
+          </div>
+          <div>
+            <span style="font-size: 11px; color: var(--slate-500); font-weight: 600;">Confidence / Score:</span>
+            <span id="xaiConfBadge" style="margin-left: 6px; font-weight: 700; font-size: 13px; color: var(--navy-900);">--</span>
+          </div>
+        </div>
+
+        <!-- Local Waterfall / Attribution Bar Chart -->
+        <div id="chart-local-waterfall" style="width: 100%; height: 250px; max-height: 250px; margin-bottom: 12px; display: none;"></div>
+
+        <!-- Decision Steps / Attribution List -->
+        <div style="font-weight: 700; font-size: 12px; color: var(--navy-900); margin-bottom: 8px;" id="localExplainTitle">
+          Detailed Decision Traces & Drivers:
+        </div>
+        <ul id="localExplainList" style="padding-left: 20px; font-size: 12px; line-height: 1.6; color: var(--navy-800); font-family: var(--font-mono); margin-bottom: 12px;">
+        </ul>
+
+        <!-- Counterfactual What-If Box -->
+        <div id="counterfactualBox" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 10px 14px; font-size: 12px; color: #166534; line-height: 1.5;">
+          <strong>Counterfactual Analysis ("What-If"):</strong>
+          <span id="counterfactualText">Modifying dominant features will steer the prediction across decision thresholds.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Academic Submission & Viva Preparation Quick Links -->
+<div class="card">
+  <div class="card-body" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+    <div>
+      <h3 style="font-size: 15px; font-weight: 700; color: var(--navy-900);">Preparing for Machine Learning Practical Viva?</h3>
+      <p style="font-size: 13px; color: var(--slate-500); margin-top: 4px;">
+        Explore common faculty viva voce questions, algorithmic intuitions, and copyable Python code for {{ spec.title }}.
+      </p>
+    </div>
+    <div style="display: flex; gap: 12px;">
+      <a href="{{ url_for('learning', key=key) }}" class="btn btn-secondary btn-sm">Open Viva Learning Guide</a>
+      <a href="{{ url_for('api_export_pdf', key=key) }}" class="btn btn-primary btn-sm">Download Lab Report (PDF)</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // 1. Render Global Importance Chart
+  const globalChartData = {{ global_imp.chart_json | tojson }};
+  if (globalChartData && document.getElementById("chart-global-importance")) {
+    Plotly.newPlot("chart-global-importance", globalChartData.data, globalChartData.layout, { responsive: true, displayModeBar: false });
+  }
+
+  // 2. Autofill Button
+  const btnAutofill = document.getElementById("btnAutofillXAI");
+  const sampleData = {{ spec.sample_data | tojson }};
+  if (btnAutofill && sampleData) {
+    btnAutofill.addEventListener("click", () => {
+      for (const [key, val] of Object.entries(sampleData)) {
+        const inp = document.getElementById("xai_" + key);
+        if (inp) inp.value = val;
+      }
+    });
+  }
+
+  // 3. Local Explanation AJAX Call
+  const btnExplain = document.getElementById("btnRunLocalExplain");
+  const outputBox = document.getElementById("localExplainOutput");
+  const outputList = document.getElementById("localExplainList");
+  const predBadge = document.getElementById("xaiPredBadge");
+  const confBadge = document.getElementById("xaiConfBadge");
+  const waterfallBox = document.getElementById("chart-local-waterfall");
+  const counterfactualText = document.getElementById("counterfactualText");
+
+  async function triggerExplanation() {
+    const form = document.getElementById("xaiExplainForm");
+    const formData = new FormData(form);
+    const data = {};
+    formData.forEach((val, key) => { data[key] = val; });
+
+    btnExplain.disabled = true;
+    btnExplain.innerText = "Analyzing decision paths...";
+
+    try {
+      const res = await fetch("{{ url_for('api_explain', key=key) }}", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      });
+      const result = await res.json();
+      btnExplain.disabled = false;
+      btnExplain.innerText = "Explain Instance Prediction";
+
+      if (result.success && result.explanation) {
+        outputBox.style.display = "block";
+        outputList.innerHTML = "";
+        
+        const exp = result.explanation;
+        if (predBadge && exp.predicted_label) {
+          predBadge.innerText = exp.predicted_label;
+        }
+        if (confBadge && exp.confidence_score) {
+          confBadge.innerText = exp.confidence_score;
+        }
+
+        if (counterfactualText && exp.counterfactual) {
+          counterfactualText.innerText = exp.counterfactual;
+        }
+
+        // Render Waterfall / Attribution Chart if present
+        if (exp.waterfall_chart && waterfallBox) {
+          waterfallBox.style.display = "block";
+          Plotly.newPlot("chart-local-waterfall", exp.waterfall_chart.data, exp.waterfall_chart.layout, { responsive: true, displayModeBar: false });
+        } else if (waterfallBox) {
+          waterfallBox.style.display = "none";
+        }
+
+        const details = exp.details || [];
+        if (details.length === 0) {
+          outputList.innerHTML = "<li>Deterministic inference executed according to model parameters.</li>";
+        } else {
+          details.forEach(item => {
+            const li = document.createElement("li");
+            li.innerText = item;
+            outputList.appendChild(li);
+          });
+        }
+      } else {
+        alert("Could not generate explanation: " + (result.error || "Unknown error"));
+      }
+    } catch (err) {
+      btnExplain.disabled = false;
+      btnExplain.innerText = "Explain Instance Prediction";
+      alert("Request error: " + err);
+    }
+  }
+
+  if (btnExplain) {
+    btnExplain.addEventListener("click", triggerExplanation);
+  }
+
+  // Trigger once on page load if inputs have sample values
+  setTimeout(() => {
+    if (btnExplain && sampleData && Object.keys(sampleData).length > 0) {
+      triggerExplanation();
+    }
+  }, 400);
+});
+</script>
+{% endblock %}

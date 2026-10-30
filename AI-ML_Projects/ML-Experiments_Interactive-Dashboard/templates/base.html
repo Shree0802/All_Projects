@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a">
+  <title>{% block title %}Advanced Machine Learning Experiments Dashboard{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <!-- Plotly.js for Interactive Scientific Visualizations -->
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+  <script>
+    // Initialize Theme immediately to prevent flash of wrong mode
+    (function() {
+      const saved = localStorage.getItem('ml_lab_theme') || 'light';
+      document.documentElement.setAttribute('data-theme', saved);
+    })();
+  </script>
+  {% block head_extra %}{% endblock %}
+</head>
+<body>
+<div class="app-shell">
+  <!-- Mobile Backdrop Overlay -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- Left Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <a class="side-brand" href="{{ url_for('home') }}">
+      <div class="brand-icon-box">ML</div>
+      <div class="brand-text">
+        <div class="brand-title">ML<span>Lab</span></div>
+        <div class="brand-subtitle">LABORATORY WORKSPACE</div>
+      </div>
+    </a>
+
+    <div class="side-section-label">WORKSPACE</div>
+    <nav class="side-nav" aria-label="Main Navigation">
+      <a class="side-link {% if request.endpoint == 'home' %}active{% endif %}" href="{{ url_for('home') }}">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Overview</span>
+      </a>
+
+      <a class="side-link {% if request.endpoint == 'training' %}active{% endif %}" href="{{ url_for('training') }}">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <span>Model Training</span>
+        <span class="side-badge" style="background-color: var(--teal-100); color: var(--teal-700);">Studio</span>
+      </a>
+
+      <a class="side-link {% if request.endpoint in ['experiments', 'algorithm'] %}active{% endif %}" href="{{ url_for('experiments') }}">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        <span>All Experiments</span>
+        <span class="side-badge">12</span>
+      </a>
+
+      <div class="side-section-label" style="margin-top: 14px;">ANALYTICS & EVALUATION</div>
+
+      <a class="side-link {% if request.endpoint == 'results' %}active{% endif %}" href="{{ url_for('results') }}">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+        <span>Visualizations</span>
+      </a>
+
+      <a class="side-link {% if request.endpoint == 'comparison' %}active{% endif %}" href="{{ url_for('comparison') }}">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="12" y1="20" x2="12" y2="10"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+        <span>Model Comparison</span>
+      </a>
+
+      <a class="side-link {% if request.endpoint == 'explainability' %}active{% endif %}" href="{{ url_for('explainability') }}">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>Explainable AI</span>
+        <span class="side-badge" style="background-color: var(--cyan-100); color: var(--cyan-700);">XAI</span>
+      </a>
+
+      <a class="side-link {% if request.endpoint == 'dataset_explorer' %}active{% endif %}" href="{{ url_for('dataset_explorer') }}">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        <span>Dataset Explorer</span>
+      </a>
+
+      <div class="side-section-label" style="margin-top: 14px;">ACADEMIC & RECORDS</div>
+
+      <a class="side-link {% if request.endpoint == 'reports' %}active{% endif %}" href="{{ url_for('reports') }}">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        <span>Lab Reports</span>
+        <span class="side-badge" style="background-color: var(--amber-100); color: var(--amber-700);">PDF</span>
+      </a>
+
+      <a class="side-link {% if request.endpoint == 'history' %}active{% endif %}" href="{{ url_for('history') }}">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <span>Experiment History</span>
+      </a>
+
+      <a class="side-link {% if request.endpoint == 'learning' %}active{% endif %}" href="{{ url_for('learning') }}">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Learning Mode</span>
+      </a>
+
+      <a class="side-link {% if request.endpoint in ['about', 'settings'] %}active{% endif %}" href="{{ url_for('about') }}">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Settings & Info</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar Bottom Badge with DYPCET Logo -->
+    <div class="sidebar-footer">
+      <div class="sidebar-logo-thumb">
+        <img src="{{ url_for('static', filename='images/college-logo.png') }}" alt="DYPCET Emblem" style="object-fit: contain; width: 36px; height: 36px;">
+      </div>
+      <div class="sidebar-footer-text">
+        <div class="sidebar-footer-title">DYPCET ML Lab</div>
+        <div class="sidebar-footer-sub">{{ student.year }}</div>
+      </div>
+      <div class="online-pulse" title="Laboratory Workspace Active"></div>
+    </div>
+  </aside>
+
+  <!-- Main Column -->
+  <div class="main-column">
+    <!-- Top Navigation Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Open navigation menu">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="breadcrumbs">
+          <a href="{{ url_for('home') }}">ML Laboratory Workspace</a>
+          <span class="breadcrumb-sep">/</span>
+          <span class="breadcrumb-current">{% block breadcrumb %}Overview{% endblock %}</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <!-- Theme Toggle Button -->
+        <button class="theme-toggle-btn" id="themeToggle" title="Toggle Light/Dark Theme" aria-label="Toggle Theme">
+          <svg class="sun-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <svg class="moon-icon" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+
+        <span class="badge-subject">
+          <span class="pulse-dot"></span>
+          {{ student.subject_lab|upper }}
+        </span>
+        <span class="badge-class">{{ student.class }}</span>
+        <div class="avatar-badge" title="{{ student.name }} (Roll: {{ student.roll_no }})">PP</div>
+      </div>
+    </header>
+
+    <!-- Page Content Container -->
+    <main class="page-content">
+      {% block content %}{% endblock %}
+
+      <!-- Global Footer -->
+      <footer class="site-footer" style="margin-top: 36px;">
+        <div class="footer-left">
+          <span class="footer-brand-title">{{ student.project_title }}</span>
+          <span>·</span>
+          <span>{{ student.project_type }}</span>
+        </div>
+        <div class="footer-right">
+          <span>Student: <strong>{{ student.name }}</strong> ({{ student.class }}, Roll: {{ student.roll_no }})</span>
+          <span>·</span>
+          <span>{{ student.college }}, Kolhapur</span>
+        </div>
+      </footer>
+    </main>
+  </div>
+</div>
+
+<!-- Global Mobile & Theme JavaScript -->
+<script>
+(() => {
+  // Mobile Drawer Toggle
+  const sidebar = document.getElementById('sidebar');
+  const mobileToggle = document.getElementById('mobileToggle');
+  const backdrop = document.getElementById('sidebarBackdrop');
+
+  if (mobileToggle && sidebar && backdrop) {
+    mobileToggle.addEventListener('click', () => {
+      sidebar.classList.add('open');
+      backdrop.classList.add('active');
+    });
+    backdrop.addEventListener('click', () => {
+      sidebar.classList.remove('open');
+      backdrop.classList.remove('active');
+    });
+  }
+
+  // Theme Switcher
+  const themeBtn = document.getElementById('themeToggle');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme') || 'light';
+      const target = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', target);
+      localStorage.setItem('ml_lab_theme', target);
+    });
+  }
+})();
+</script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

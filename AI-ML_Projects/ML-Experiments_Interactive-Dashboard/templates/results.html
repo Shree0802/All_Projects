@@ -1,0 +1,431 @@
+{% extends "base.html" %}
+
+{% block title %}Evaluation & Results: {{ metadata.title }} | ML Lab Dashboard{% endblock %}
+{% block breadcrumb %}Model Evaluation · {{ metadata.title }}{% endblock %}
+
+{% block content %}
+<!-- Results Top Navigation -->
+<div class="detail-top-nav-bar">
+  <div style="display: flex; gap: 10px; align-items: center;">
+    <a href="{{ url_for('training') }}?exp={{ key }}" class="btn-back-link">
+      <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      <span>Back to Training Workspace</span>
+    </a>
+    <span style="color: var(--slate-300);">|</span>
+    <span style="font-size: 11.5px; color: var(--slate-500);">Run ID: <code>{{ metadata.run_id }}</code></span>
+  </div>
+
+  <div style="display: flex; gap: 8px;">
+    <!-- Switch algorithm selector -->
+    <select class="form-input-control" style="font-size: 11.5px; padding: 4px 8px;" onchange="window.location.href='/results/' + this.value">
+      {% for k, a in algorithms.items() %}
+        <option value="{{ k }}" {% if k == key %}selected{% endif %}>{{ a.num }}. {{ a.title }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</div>
+
+<!-- Header Card -->
+<section class="detail-header-card">
+  <div class="detail-header-main">
+    <div class="hero-eyebrow">
+      <span class="badge-cat {{ 'badge-cat-regression' if metadata.category == 'Regression' else 'badge-cat-classification' }}">
+        {{ metadata.category }}
+      </span>
+      <span>TRAINING EVALUATION REPORT</span>
+    </div>
+    <h1>{{ metadata.title }}</h1>
+    <p class="detail-header-desc">
+      Trained on <code>{{ metadata.train_samples }}</code> observations and evaluated on <code>{{ metadata.test_samples }}</code> held-out test observations. Training latency: <strong>{{ metadata.duration_ms }} ms</strong>.
+    </p>
+  </div>
+  <div class="detail-huge-number">METRICS</div>
+</section>
+
+<!-- Section A: Summary KPI Ribbon -->
+<div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; margin: 20px 0;">
+  {% if metadata.category == 'Regression' %}
+    <div class="metric-stat-card">
+      <span class="metric-stat-label">R² Score (Variance Explained)</span>
+      <span class="metric-stat-number">{{ metrics.r2_score }}</span>
+    </div>
+    <div class="metric-stat-card">
+      <span class="metric-stat-label">Mean Absolute Error (MAE)</span>
+      <span class="metric-stat-number">{{ metrics.mae }}</span>
+    </div>
+    <div class="metric-stat-card">
+      <span class="metric-stat-label">Root Mean Squared Error (RMSE)</span>
+      <span class="metric-stat-number">{{ metrics.rmse }}</span>
+    </div>
+    <div class="metric-stat-card">
+      <span class="metric-stat-label">Mean Squared Error (MSE)</span>
+      <span class="metric-stat-number">{{ metrics.mse }}</span>
+    </div>
+  {% else %}
+    <div class="metric-stat-card">
+      <span class="metric-stat-label">Held-out Test Accuracy</span>
+      <span class="metric-stat-number">{{ metrics.accuracy }}%</span>
+    </div>
+    <div class="metric-stat-card">
+      <span class="metric-stat-label">Precision Score</span>
+      <span class="metric-stat-number">{{ metrics.precision }}%</span>
+    </div>
+    <div class="metric-stat-card">
+      <span class="metric-stat-label">Recall Score (Sensitivity)</span>
+      <span class="metric-stat-number">{{ metrics.recall }}%</span>
+    </div>
+    <div class="metric-stat-card">
+      <span class="metric-stat-label">F1-Score (Harmonic Mean)</span>
+      <span class="metric-stat-number">{{ metrics.f1_score }}%</span>
+    </div>
+  {% endif %}
+</div>
+
+<!-- Tabs Navigation -->
+<div class="toolbar-card" style="margin-bottom: 20px;">
+  <div class="filter-pills-group" role="tablist">
+    <button class="filter-tab-btn active" id="tabBtnVisualizations" onclick="switchTab('visualizations')">
+      <span>Interactive Visualizations</span>
+      <span class="filter-count-badge">{{ charts|length }} Charts</span>
+    </button>
+    <button class="filter-tab-btn" id="tabBtnPerformance" onclick="switchTab('performance')">
+      <span>Performance & Metrics</span>
+    </button>
+    <button class="filter-tab-btn" id="tabBtnPrediction" onclick="switchTab('prediction')">
+      <span>Live Prediction Testing</span>
+    </button>
+    <button class="filter-tab-btn" id="tabBtnDetails" onclick="switchTab('details')">
+      <span>Training Specifications</span>
+    </button>
+    <button class="filter-tab-btn" id="tabBtnDownloads" onclick="switchTab('downloads')">
+      <span>Download Reports</span>
+    </button>
+  </div>
+</div>
+
+<!-- TAB 1: INTERACTIVE VISUALIZATIONS -->
+<div id="tabContentVisualizations" class="tab-pane active" style="display: flex; flex-direction: column; gap: 24px;">
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px;">
+    {% for chart_key, chart_json in charts.items() %}
+      {% if chart_json and chart_key != 'tree_structure' and chart_key != 'support_vectors_info' %}
+      <div class="chart-wrapper">
+        <div id="chart_{{ chart_key }}" style="width: 100%; height: 380px;"></div>
+      </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Special Tree Structure View for Decision Tree -->
+  {% if charts.tree_structure %}
+  <div class="form-card">
+    <div class="form-panel-header">
+      <div>
+        <h3 class="form-panel-title">Fitted Decision Tree Structural Rules</h3>
+        <span style="font-size: 11.5px; color: var(--slate-500);">
+          Max Depth: {{ charts.tree_structure.max_depth }} | Leaf Nodes: {{ charts.tree_structure.n_leaves }} | Split Features: {{ charts.tree_structure.n_features }}
+        </span>
+      </div>
+      <span class="code-pill">Tree Hierarchy</span>
+    </div>
+    <pre style="background: var(--slate-900); color: var(--teal-400); padding: 16px; border-radius: var(--radius-md); font-family: var(--font-mono); font-size: 11px; max-height: 320px; overflow-y: auto; line-height: 1.5;">{{ charts.tree_structure.text_representation }}</pre>
+  </div>
+  {% endif %}
+
+  <!-- Support Vectors Information -->
+  {% if charts.support_vectors_info %}
+  <div class="spec-record-box">
+    <h3 class="spec-record-title">Support Vector Statistics</h3>
+    <p style="font-size: 12px; color: var(--navy-800); line-height: 1.6;">
+      Support Vectors per class (<code>{{ charts.support_vectors_info.classes }}</code>): <strong>{{ charts.support_vectors_info.n_support }}</strong> instances.
+      These critical boundary instances establish the optimal maximal separating margin in the continuous feature space.
+    </p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- TAB 2: PERFORMANCE & METRICS -->
+<div id="tabContentPerformance" class="tab-pane" style="display: none;">
+  <div class="form-card" style="margin-bottom: 24px;">
+    <h3 class="form-panel-title" style="margin-bottom: 14px;">Detailed Evaluation Report</h3>
+    {% if metadata.category == 'Classification' and metrics.classification_report %}
+      <div class="table-responsive-container">
+        <table class="data-spec-table">
+          <thead>
+            <tr>
+              <th>Class Label</th>
+              <th>Precision</th>
+              <th>Recall</th>
+              <th>F1-Score</th>
+              <th>Support (Test Instances)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in metrics.classes %}
+            <tr>
+              <td><strong>Class {{ c }}</strong></td>
+              <td>{{ (metrics.classification_report[c]['precision'] * 100)|round(2) }}%</td>
+              <td>{{ (metrics.classification_report[c]['recall'] * 100)|round(2) }}%</td>
+              <td>{{ (metrics.classification_report[c]['f1-score'] * 100)|round(2) }}%</td>
+              <td>{{ metrics.classification_report[c]['support'] }}</td>
+            </tr>
+            {% endfor %}
+            <tr style="background-color: var(--slate-100); font-weight: 700;">
+              <td>Accuracy</td>
+              <td colspan="3" style="text-align: center;">{{ metrics.accuracy }}%</td>
+              <td>{{ metrics.test_samples }}</td>
+            </tr>
+            <tr style="background-color: var(--slate-50); font-weight: 700;">
+              <td>Weighted Avg</td>
+              <td>{{ (metrics.classification_report['weighted avg']['precision'] * 100)|round(2) }}%</td>
+              <td>{{ (metrics.classification_report['weighted avg']['recall'] * 100)|round(2) }}%</td>
+              <td>{{ (metrics.classification_report['weighted avg']['f1-score'] * 100)|round(2) }}%</td>
+              <td>{{ metrics.classification_report['weighted avg']['support'] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    {% elif metadata.category == 'Regression' %}
+      <div class="table-responsive-container">
+        <table class="data-spec-table">
+          <thead>
+            <tr>
+              <th>Regression Metric</th>
+              <th>Evaluated Value</th>
+              <th>Interpretation</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>R² Score (Coefficient of Determination)</strong></td>
+              <td><span class="code-pill">{{ metrics.r2_score }}</span></td>
+              <td>Proportion of variance in target explained by the regression features.</td>
+            </tr>
+            <tr>
+              <td><strong>Mean Absolute Error (MAE)</strong></td>
+              <td><span class="code-pill">{{ metrics.mae }}</span></td>
+              <td>Average absolute difference between predicted and actual values.</td>
+            </tr>
+            <tr>
+              <td><strong>Root Mean Squared Error (RMSE)</strong></td>
+              <td><span class="code-pill">{{ metrics.rmse }}</span></td>
+              <td>Standard deviation of prediction residuals (penalizes large outliers).</td>
+            </tr>
+            <tr>
+              <td><strong>Mean Squared Error (MSE)</strong></td>
+              <td><span class="code-pill">{{ metrics.mse }}</span></td>
+              <td>Average squared deviation between predictions and actuals.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- TAB 3: LIVE PREDICTION TESTING -->
+<div id="tabContentPrediction" class="tab-pane" style="display: none;">
+  <div class="detail-main-grid">
+    <div class="form-card">
+      <div class="form-panel-header">
+        <div>
+          <h3 class="form-panel-title">Model Inference Tester</h3>
+          <span style="font-size: 11.5px; color: var(--slate-500);">Test live feature predictions using the trained model.</span>
+        </div>
+        {% if spec.sample_data %}
+        <button type="button" class="btn-sample-fill" id="btnFillSampleResults">
+          Autofill Sample Data
+        </button>
+        {% endif %}
+      </div>
+
+      <form id="livePredictForm">
+        <div class="inputs-grid-layout {% if spec.fields|length > 6 %}dense-layout{% endif %}">
+          {% for field, label, typ, step, placeholder in spec.fields %}
+          <div class="form-field-group {% if typ == 'text' %}full-width{% endif %}">
+            <label class="form-label" for="live_{{ field }}">{{ label }}</label>
+            {% if typ == 'text' %}
+              <textarea id="live_{{ field }}" name="{{ field }}" class="form-textarea-control" placeholder="{{ placeholder }}" required>{{ spec.sample_data.get(field, '') }}</textarea>
+            {% else %}
+              <input type="number" step="{{ step }}" id="live_{{ field }}" name="{{ field }}" class="form-input-control" value="{{ spec.sample_data.get(field, '') }}" required>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+
+        <button type="button" class="btn-predict-submit" id="btnRunLivePredict">
+          <span>Generate Prediction</span>
+        </button>
+      </form>
+    </div>
+
+    <div class="result-card" id="liveResultBox">
+      <span class="prediction-status-badge">Prediction Output</span>
+      <div class="prediction-output-value" id="livePredictionText">Ready for input</div>
+      <div id="liveConfidenceContainer" style="display: none;" class="confidence-box">
+        <div class="confidence-header">
+          <span>Confidence Probability</span>
+          <span class="confidence-score" id="liveConfidenceScore">--%</span>
+        </div>
+        <div class="confidence-progress-bar">
+          <div class="confidence-progress-fill" id="liveConfidenceBar" style="width: 0%;"></div>
+        </div>
+      </div>
+      <p class="prediction-note" id="livePredictionNote">
+        Inference executed via verified model pipeline.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 4: TRAINING SPECIFICATIONS -->
+<div id="tabContentDetails" class="tab-pane" style="display: none;">
+  <div class="form-card">
+    <h3 class="form-panel-title" style="margin-bottom: 14px;">Training & Pipeline Metadata</h3>
+    <div class="table-responsive-container">
+      <table class="data-spec-table">
+        <tbody>
+          <tr><th>Run Identifier</th><td><code>{{ metadata.run_id }}</code></td></tr>
+          <tr><th>Algorithm Name</th><td><strong>{{ metadata.title }}</strong></td></tr>
+          <tr><th>Category</th><td>{{ metadata.category }}</td></tr>
+          <tr><th>Source Dataset</th><td><code>{{ metadata.dataset }}</code></td></tr>
+          <tr><th>Target Column</th><td><code>{{ metadata.target }}</code></td></tr>
+          <tr><th>Input Features</th><td><small>{{ metadata.features|join(', ') }}</small></td></tr>
+          <tr><th>Training Samples</th><td>{{ metadata.train_samples }} records ({{ (100 - metadata.test_size*100)|int }}%)</td></tr>
+          <tr><th>Testing Samples</th><td>{{ metadata.test_samples }} records ({{ (metadata.test_size*100)|int }}%)</td></tr>
+          <tr><th>Random State Seed</th><td>{{ metadata.random_state }}</td></tr>
+          <tr><th>Training Duration</th><td>{{ metadata.duration_ms }} milliseconds</td></tr>
+          <tr><th>Saved Artifact Path</th><td><code>models/trained/{{ metadata.artifact_file }}</code></td></tr>
+          <tr><th>Timestamp</th><td>{{ metadata.timestamp }}</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 5: DOWNLOAD REPORTS -->
+<div id="tabContentDownloads" class="tab-pane" style="display: none;">
+  <div class="form-card">
+    <h3 class="form-panel-title" style="margin-bottom: 12px;">Export Evaluation Data & Reports</h3>
+    <p class="section-desc" style="margin-bottom: 20px;">
+      Download verified evaluation metrics, test results, and metadata from actual held-out test data.
+    </p>
+
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px;">
+      <div class="spec-record-box">
+        <h4 style="font-size: 14px; font-weight: 700; color: var(--navy-900); margin-bottom: 6px;">Academic Lab Report (PDF)</h4>
+        <p style="font-size: 11.5px; color: var(--slate-500); margin-bottom: 14px;">Formal academic report with DYPCET header, student credentials, theory, metrics table, and chart.</p>
+        <a href="/api/export-pdf/{{ key }}" class="btn-sample-fill" style="background: var(--teal-600); color: white;" download>
+          Download PDF Report
+        </a>
+      </div>
+
+      <div class="spec-record-box">
+        <h4 style="font-size: 14px; font-weight: 700; color: var(--navy-900); margin-bottom: 6px;">Evaluation Metrics JSON</h4>
+        <p style="font-size: 11.5px; color: var(--slate-500); margin-bottom: 14px;">Complete metadata including training duration, parameters, and held-out scores.</p>
+        <a href="/api/export-report/{{ key }}?format=json" class="btn-sample-fill" download>
+          Download JSON Report
+        </a>
+      </div>
+
+      <div class="spec-record-box">
+        <h4 style="font-size: 14px; font-weight: 700; color: var(--navy-900); margin-bottom: 6px;">Evaluation Metrics CSV</h4>
+        <p style="font-size: 11.5px; color: var(--slate-500); margin-bottom: 14px;">Tabular CSV format containing all computed performance evaluation metrics.</p>
+        <a href="/api/export-report/{{ key }}?format=csv" class="btn-sample-fill" download>
+          Download CSV Report
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(() => {
+  // Render all Plotly charts
+  const charts = {{ charts|tojson|safe if charts else '{}' }};
+  for (const [chartKey, chartData] of Object.entries(charts)) {
+    const elemId = `chart_${chartKey}`;
+    const elem = document.getElementById(elemId);
+    if (elem && chartData && chartData.data) {
+      Plotly.newPlot(elemId, chartData.data, chartData.layout, { responsive: true, displayModeBar: true });
+    }
+  }
+
+  // Tab switching
+  window.switchTab = function(tabName) {
+    document.querySelectorAll('.tab-pane').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.filter-tab-btn').forEach(btn => btn.classList.remove('active'));
+
+    const activePane = document.getElementById(`tabContent${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+    const activeBtn = document.getElementById(`tabBtn${tabName.charAt(0).toUpperCase() + tabName.slice(1)}`);
+
+    if (activePane) activePane.style.display = (tabName === 'visualizations') ? 'flex' : 'block';
+    if (activeBtn) activeBtn.classList.add('active');
+
+    // Trigger plotly resize when tab becomes visible
+    window.dispatchEvent(new Event('resize'));
+  };
+
+  // Live Prediction Tester
+  const btnRunLive = document.getElementById('btnRunLivePredict');
+  const livePredictionText = document.getElementById('livePredictionText');
+  const liveConfidenceContainer = document.getElementById('liveConfidenceContainer');
+  const liveConfidenceScore = document.getElementById('liveConfidenceScore');
+  const liveConfidenceBar = document.getElementById('liveConfidenceBar');
+  const btnFillSample = document.getElementById('btnFillSampleResults');
+  const sampleData = {{ spec.sample_data|tojson|safe if spec.sample_data else '{}' }};
+
+  if (btnFillSample) {
+    btnFillSample.addEventListener('click', () => {
+      for (const [k, v] of Object.entries(sampleData)) {
+        const inp = document.getElementById(`live_${k}`);
+        if (inp) inp.value = v;
+      }
+    });
+  }
+
+  if (btnRunLive) {
+    btnRunLive.addEventListener('click', async () => {
+      const form = document.getElementById('livePredictForm');
+      const formData = new FormData(form);
+      const dataObj = {};
+      formData.forEach((val, key) => dataObj[key] = val);
+
+      btnRunLive.disabled = true;
+      btnRunLive.textContent = 'Computing prediction...';
+
+      try {
+        const res = await fetch('/api/predict/{{ key }}', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dataObj)
+        });
+        const resp = await res.json();
+        btnRunLive.disabled = false;
+        btnRunLive.textContent = 'Generate Prediction';
+
+        if (resp.success) {
+          const r = resp.result;
+          livePredictionText.textContent = r.prediction;
+          if (r.confidence !== null && r.confidence !== undefined) {
+            liveConfidenceContainer.style.display = 'block';
+            liveConfidenceScore.textContent = `${r.confidence}%`;
+            liveConfidenceBar.style.width = `${r.confidence}%`;
+          } else {
+            liveConfidenceContainer.style.display = 'none';
+          }
+        } else {
+          livePredictionText.textContent = `Error: ${resp.error}`;
+          liveConfidenceContainer.style.display = 'none';
+        }
+      } catch (err) {
+        btnRunLive.disabled = false;
+        btnRunLive.textContent = 'Generate Prediction';
+        livePredictionText.textContent = 'Prediction failed due to server error.';
+      }
+    });
+  }
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0f172a">
+  <title>Training & Evaluation Lab | ML Lab Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <!-- Chart.js for verified academic visualizations -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+<div class="app-shell">
+  <!-- Mobile Backdrop Overlay -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <!-- Left Sidebar Navigation -->
+  <aside class="sidebar" id="sidebar">
+    <a class="side-brand" href="{{ url_for('home') }}">
+      <div class="brand-icon-box">ML</div>
+      <div class="brand-text">
+        <div class="brand-title">ML<span>Lab</span></div>
+        <div class="brand-subtitle">ALGORITHM WORKSPACE</div>
+      </div>
+    </a>
+
+    <div class="side-section-label">LABORATORY</div>
+    <nav class="side-nav" aria-label="Main Navigation">
+      <a class="side-link" href="{{ url_for('home') }}#overview">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        <span>Dashboard</span>
+      </a>
+      <a class="side-link" href="{{ url_for('home') }}#experiments">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+        <span>All Experiments</span>
+        <span class="side-badge">11</span>
+      </a>
+      <a class="side-link active" href="{{ url_for('training') }}">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+        <span>Training & Evaluation</span>
+        <span class="side-badge" style="background-color: var(--teal-100); color: var(--teal-700);">Lab</span>
+      </a>
+      <a class="side-link" href="{{ url_for('home') }}#model-info">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+        <span>Model Information</span>
+      </a>
+      <a class="side-link" href="{{ url_for('home') }}#student-profile">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span>About Student</span>
+      </a>
+      <a class="side-link" href="{{ url_for('home') }}#project-info">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>Project Information</span>
+      </a>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <div class="sidebar-logo-thumb">
+        <img src="{{ url_for('static', filename='images/college-logo.png') }}" alt="DYPCET Logo">
+      </div>
+      <div class="sidebar-footer-text">
+        <div class="sidebar-footer-title">DYPCET ML Lab</div>
+        <div class="sidebar-footer-sub">{{ student.year }}</div>
+      </div>
+      <div class="online-pulse" title="Laboratory Workspace Active"></div>
+    </div>
+  </aside>
+
+  <!-- Main Column -->
+  <div class="main-column">
+    <!-- Top Navigation Bar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-toggle" id="mobileToggle" aria-label="Open menu">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="breadcrumbs">
+          <a href="{{ url_for('home') }}">Workspace</a>
+          <span class="breadcrumb-sep">/</span>
+          <span class="breadcrumb-current">Training & Evaluation Lab</span>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <span class="badge-subject">
+          <span class="pulse-dot"></span>
+          {{ student.subject_lab|upper }}
+        </span>
+        <span class="badge-class">{{ student.class }}</span>
+        <div class="avatar-badge" title="{{ student.name }} ({{ student.roll_no }})">PP</div>
+      </div>
+    </header>
+
+    <main class="page-content">
+      <!-- Breadcrumb Bar -->
+      <div class="detail-top-nav-bar">
+        <a href="{{ url_for('home') }}" class="btn-back-link">
+          <svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          <span>Back to Dashboard</span>
+        </a>
+      </div>
+
+      <!-- Training Header Card -->
+      <section class="detail-header-card">
+        <div class="detail-header-main">
+          <div class="hero-eyebrow">
+            <span class="badge-cat badge-cat-classification">LABORATORY EXPERIMENT WORKFLOW</span>
+            <span>DATASET INSPECTION & MODEL EVALUATION</span>
+          </div>
+          <h1>Machine Learning Training & Evaluation Lab</h1>
+          <p class="detail-header-desc">
+            Demonstrate the full machine learning lifecycle: inspect source datasets, configure stratified train/test splits, fit algorithms, evaluate performance on held-out test data, and export newly trained model artifacts safely.
+          </p>
+        </div>
+        <div class="detail-huge-number">LAB</div>
+      </section>
+
+      <!-- Experiment Selection Toolbar -->
+      <div class="toolbar-card">
+        <div style="display: flex; align-items: center; gap: 12px; flex: 1; flex-wrap: wrap;">
+          <label for="experimentSelect" style="font-size: 12px; font-weight: 700; color: var(--navy-800);">
+            Select Experiment to Train:
+          </label>
+          <select id="experimentSelect" class="form-input-control" style="max-width: 380px;">
+            {% for key, cfg in training_configs.items() %}
+              <option value="{{ key }}">
+                {{ cfg.title }} ({{ cfg.category }}) — {{ cfg.dataset_file }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div style="font-size: 11px; color: var(--slate-500);">
+          <em>Trained models are exported to <code>models/retrained/</code> without overwriting base artifacts.</em>
+        </div>
+      </div>
+
+      <!-- Two-column Layout: Dataset Inspection & Configuration + Results & Plots -->
+      <div class="training-layout-grid">
+        <!-- Left: Dataset Overview & Training Controls -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <!-- Dataset Inspection Card -->
+          <div class="form-card">
+            <div class="form-panel-header">
+              <div>
+                <h2 class="form-panel-title" id="datasetTitle">Dataset Inspection</h2>
+                <span style="font-size: 11.5px; color: var(--slate-500);" id="datasetFilename">Loading dataset metadata...</span>
+              </div>
+              <span class="code-pill" id="datasetRowsBadge">0 Records</span>
+            </div>
+
+            <!-- Stats Grid -->
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 16px;">
+              <div class="metric-stat-card" style="padding: 10px 12px;">
+                <span class="metric-stat-label">Total Rows</span>
+                <span class="metric-stat-number" id="statRows" style="font-size: 18px;">--</span>
+              </div>
+              <div class="metric-stat-card" style="padding: 10px 12px;">
+                <span class="metric-stat-label">Total Cols</span>
+                <span class="metric-stat-number" id="statCols" style="font-size: 18px;">--</span>
+              </div>
+              <div class="metric-stat-card" style="padding: 10px 12px;">
+                <span class="metric-stat-label">Missing Values</span>
+                <span class="metric-stat-number" id="statMissing" style="font-size: 18px; color: var(--emerald-600);">0</span>
+              </div>
+              <div class="metric-stat-card" style="padding: 10px 12px;">
+                <span class="metric-stat-label">Target Column</span>
+                <span class="metric-stat-number" id="statTarget" style="font-size: 14px; color: var(--navy-800); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">--</span>
+              </div>
+            </div>
+
+            <!-- Dataset Preview Table (First 5 records) -->
+            <h4 style="font-size: 11.5px; font-weight: 700; color: var(--navy-800); margin-bottom: 8px;">
+              Sample Records Preview (Top 5 Rows)
+            </h4>
+            <div class="table-responsive-container" style="max-height: 200px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); margin-bottom: 16px;">
+              <table class="data-spec-table" id="previewTable">
+                <thead id="previewHead"><tr><th>Loading...</th></tr></thead>
+                <tbody id="previewBody"><tr><td>Loading data...</td></tr></tbody>
+              </table>
+            </div>
+
+            <!-- Training Parameters Form -->
+            <h4 style="font-size: 12.5px; font-weight: 800; color: var(--navy-900); margin-bottom: 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle);">
+              Training & Split Configuration
+            </h4>
+            <form id="trainingConfigForm">
+              <div class="inputs-grid-layout">
+                <div class="form-field-group">
+                  <label class="form-label" for="testSizeInput">Test Split Ratio (%)</label>
+                  <select id="testSizeInput" class="form-input-control">
+                    <option value="0.2">20% Testing (80% Training)</option>
+                    <option value="0.25">25% Testing (75% Training)</option>
+                    <option value="0.3">30% Testing (70% Training)</option>
+                    <option value="0.15">15% Testing (85% Training)</option>
+                  </select>
+                </div>
+
+                <div class="form-field-group">
+                  <label class="form-label" for="randomSeedInput">Random State / Seed</label>
+                  <input type="number" id="randomSeedInput" class="form-input-control" value="42" min="0" max="9999">
+                </div>
+              </div>
+
+              <!-- Dynamic Hyperparameters Box -->
+              <div id="hyperparamsBox" style="margin-top: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;"></div>
+
+              <div style="margin-top: 20px; display: flex; gap: 12px;">
+                <button type="button" class="btn-primary-action" id="btnTrainModel" style="flex: 1; justify-content: center; padding: 12px;">
+                  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  <span>Train & Evaluate Model</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Right: Real Evaluation Metrics & Visualizations -->
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+          <!-- Evaluation Metrics Card -->
+          <div class="result-card" id="evaluationResultsPanel">
+            <div class="form-panel-header">
+              <div>
+                <h3 class="form-panel-title">Evaluation Metrics on Held-out Test Set</h3>
+                <span style="font-size: 11.5px; color: var(--slate-500);" id="metricNote">Calculated strictly from unseen test partition.</span>
+              </div>
+              <span class="prediction-status-badge" id="evalStatusBadge" style="display: none;">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                Trained
+              </span>
+            </div>
+
+            <!-- Empty state before training -->
+            <div id="evalEmptyState" class="result-empty-state">
+              <div class="empty-state-icon-box">
+                <svg fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+              </div>
+              <h4 class="empty-state-heading">Model Not Yet Trained</h4>
+              <p class="empty-state-text">
+                Select an experiment, configure the train/test ratio, and click "Train & Evaluate Model" to execute training.
+              </p>
+            </div>
+
+            <!-- Active Metrics Display -->
+            <div id="activeMetricsDisplay" style="display: none;">
+              <!-- Dynamic Metric Cards (Accuracy/Precision/Recall/F1 or MAE/MSE/RMSE/R2) -->
+              <div class="metrics-summary-grid" id="metricsCardsGrid"></div>
+
+              <!-- Visualizations Canvas -->
+              <div class="chart-wrapper">
+                <canvas id="evaluationChart"></canvas>
+              </div>
+
+              <!-- Export Button -->
+              <div style="margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-subtle); display: flex; justify-content: space-between; align-items: center;">
+                <div style="font-size: 11px; color: var(--slate-500);" id="exportStatusText">
+                  Ready to export trained artifact.
+                </div>
+                <button type="button" class="btn-sample-fill" id="btnSaveArtifact">
+                  <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                  <span>Export Trained Artifact</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Laboratory Methodological Note Card -->
+          <div class="spec-record-box">
+            <h3 class="spec-record-title">Laboratory Methodology</h3>
+            <div style="font-size: 11.5px; line-height: 1.6; color: var(--slate-600); display: flex; flex-direction: column; gap: 8px;">
+              <p>
+                <strong>Zero Data Leakage:</strong> All data transformations and scalers are fitted exclusively on <code>X_train</code> and evaluated on <code>X_test</code>.
+              </p>
+              <p>
+                <strong>Stratified Partitioning:</strong> Classification datasets utilize stratified sampling to preserve proportional class distributions.
+              </p>
+              <p>
+                <strong>Persistent Artifact Safety:</strong> Newly trained models are saved to <code>models/retrained/</code> with timestamps, protecting core lab models.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="site-footer" style="margin-top: 24px;">
+        <div class="footer-left">
+          <span class="footer-brand-title">{{ student.project_title }}</span>
+          <span>·</span>
+          <span>{{ student.project_type }}</span>
+        </div>
+        <div class="footer-right">
+          <span>Developed by <strong>{{ student.name }}</strong> ({{ student.class }}, Roll: {{ student.roll_no }})</span>
+          <span>·</span>
+          <span>{{ student.college }}, Kolhapur</span>
+        </div>
+      </footer>
+    </main>
+  </div>
+</div>
+
+<!-- Interactive Client-side Script for Training Lab & Chart.js -->
+<script>
+(() => {
+  const selectExp = document.getElementById('experimentSelect');
+  const datasetTitle = document.getElementById('datasetTitle');
+  const datasetFilename = document.getElementById('datasetFilename');
+  const datasetRowsBadge = document.getElementById('datasetRowsBadge');
+  const statRows = document.getElementById('statRows');
+  const statCols = document.getElementById('statCols');
+  const statMissing = document.getElementById('statMissing');
+  const statTarget = document.getElementById('statTarget');
+  const previewHead = document.getElementById('previewHead');
+  const previewBody = document.getElementById('previewBody');
+  const hyperparamsBox = document.getElementById('hyperparamsBox');
+  const btnTrain = document.getElementById('btnTrainModel');
+  const evalEmptyState = document.getElementById('evalEmptyState');
+  const activeMetricsDisplay = document.getElementById('activeMetricsDisplay');
+  const metricsCardsGrid = document.getElementById('metricsCardsGrid');
+  const evalStatusBadge = document.getElementById('evalStatusBadge');
+  const btnSaveArtifact = document.getElementById('btnSaveArtifact');
+  const exportStatusText = document.getElementById('exportStatusText');
+
+  let currentChart = null;
+  let lastTrainedSummary = null;
+
+  // Read URL query parameter for preselecting experiment (e.g., /training?exp=heart)
+  const urlParams = new URLSearchParams(window.location.search);
+  const preselectExp = urlParams.get('exp');
+  if (preselectExp && selectExp.querySelector(`option[value="${preselectExp}"]`)) {
+    selectExp.value = preselectExp;
+  }
+
+  // Load dataset preview
+  async function loadDatasetPreview(key) {
+    try {
+      datasetFilename.textContent = 'Fetching dataset information...';
+      const res = await fetch(`/api/dataset-preview/${key}`);
+      const data = await res.json();
+
+      if (data.error) {
+        datasetFilename.textContent = data.error;
+        return;
+      }
+
+      datasetTitle.textContent = `${data.title} Dataset`;
+      datasetFilename.textContent = `File: datasets/${data.dataset_file} (${data.category})`;
+      datasetRowsBadge.textContent = `${data.rows} Rows`;
+
+      statRows.textContent = data.rows;
+      statCols.textContent = data.columns;
+      statMissing.textContent = data.missing_values;
+      statTarget.textContent = data.target;
+
+      // Render Table Headers
+      const cols = data.column_names || [];
+      previewHead.innerHTML = `<tr>${cols.map(c => `<th>${c}</th>`).join('')}</tr>`;
+
+      // Render Table Rows
+      const rows = data.preview || [];
+      previewBody.innerHTML = rows.map(r => {
+        return `<tr>${cols.map(c => `<td>${r[c] !== undefined ? r[c] : ''}</td>`).join('')}</tr>`;
+      }).join('');
+
+      // Render Hyperparameter fields based on algorithm
+      renderHyperparamControls(key);
+    } catch (err) {
+      datasetFilename.textContent = 'Failed to load dataset preview.';
+    }
+  }
+
+  function renderHyperparamControls(key) {
+    hyperparamsBox.innerHTML = '';
+    if (key === 'heart' || key === 'diabetes') {
+      hyperparamsBox.innerHTML = `
+        <div class="form-field-group">
+          <label class="form-label">Max Tree Depth</label>
+          <input type="number" id="hp_max_depth" class="form-input-control" value="5" min="1" max="50">
+        </div>
+        ${key === 'diabetes' ? `
+        <div class="form-field-group">
+          <label class="form-label">Number of Trees (n_estimators)</label>
+          <input type="number" id="hp_n_estimators" class="form-input-control" value="50" min="10" max="200">
+        </div>` : ''}
+      `;
+    } else if (key === 'breast') {
+      hyperparamsBox.innerHTML = `
+        <div class="form-field-group">
+          <label class="form-label">Number of Neighbors (K)</label>
+          <input type="number" id="hp_n_neighbors" class="form-input-control" value="5" min="1" max="25">
+        </div>
+      `;
+    } else if (key === 'linear_svm' || key === 'rbf_svm') {
+      hyperparamsBox.innerHTML = `
+        <div class="form-field-group">
+          <label class="form-label">Regularization Parameter (C)</label>
+          <input type="number" id="hp_C" class="form-input-control" value="1.0" step="0.1" min="0.1" max="100">
+        </div>
+      `;
+    }
+  }
+
+  // Handle Train and Evaluate Action
+  btnTrain.addEventListener('click', async () => {
+    const key = selectExp.value;
+    const testSize = parseFloat(document.getElementById('testSizeInput').value) || 0.2;
+    const randomSeed = parseInt(document.getElementById('randomSeedInput').value, 10) || 42;
+
+    const hyperparams = {};
+    if (document.getElementById('hp_max_depth')) hyperparams.max_depth = document.getElementById('hp_max_depth').value;
+    if (document.getElementById('hp_n_estimators')) hyperparams.n_estimators = document.getElementById('hp_n_estimators').value;
+    if (document.getElementById('hp_n_neighbors')) hyperparams.n_neighbors = document.getElementById('hp_n_neighbors').value;
+    if (document.getElementById('hp_C')) hyperparams.C = document.getElementById('hp_C').value;
+
+    btnTrain.disabled = true;
+    btnTrain.innerHTML = `<span>Training Model...</span>`;
+
+    try {
+      const res = await fetch('/api/train', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: key,
+          test_size: testSize,
+          random_state: randomSeed,
+          hyperparams: hyperparams
+        })
+      });
+
+      const data = await res.json();
+      btnTrain.disabled = false;
+      btnTrain.innerHTML = `
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span>Train & Evaluate Model</span>
+      `;
+
+      if (data.error) {
+        alert(`Training failed: ${data.error}`);
+        return;
+      }
+
+      lastTrainedSummary = data;
+      renderEvaluationMetrics(data);
+    } catch (err) {
+      btnTrain.disabled = false;
+      btnTrain.innerHTML = `<span>Train & Evaluate Model</span>`;
+      alert('An unexpected error occurred during training execution.');
+    }
+  });
+
+  function renderEvaluationMetrics(data) {
+    evalEmptyState.style.display = 'none';
+    activeMetricsDisplay.style.display = 'block';
+    evalStatusBadge.style.display = 'inline-flex';
+    exportStatusText.textContent = `Trained ${data.train_samples} samples | Evaluated on ${data.test_samples} test samples`;
+
+    metricsCardsGrid.innerHTML = '';
+    const m = data.metrics || {};
+
+    if (data.category === 'Regression') {
+      metricsCardsGrid.innerHTML = `
+        <div class="metric-stat-card">
+          <span class="metric-stat-label">R² Score (Variance Explained)</span>
+          <span class="metric-stat-number">${m.r2_score}</span>
+        </div>
+        <div class="metric-stat-card">
+          <span class="metric-stat-label">Mean Absolute Error (MAE)</span>
+          <span class="metric-stat-number">${m.mae}</span>
+        </div>
+        <div class="metric-stat-card">
+          <span class="metric-stat-label">Mean Squared Error (MSE)</span>
+          <span class="metric-stat-number">${m.mse}</span>
+        </div>
+        <div class="metric-stat-card">
+          <span class="metric-stat-label">Root Mean Squared Error (RMSE)</span>
+          <span class="metric-stat-number">${m.rmse}</span>
+        </div>
+      `;
+      renderRegressionChart(data.chart_data);
+    } else {
+      metricsCardsGrid.innerHTML = `
+        <div class="metric-stat-card">
+          <span class="metric-stat-label">Test Accuracy</span>
+          <span class="metric-stat-number">${m.accuracy}%</span>
+        </div>
+        <div class="metric-stat-card">
+          <span class="metric-stat-label">Precision Score</span>
+          <span class="metric-stat-number">${m.precision}%</span>
+        </div>
+        <div class="metric-stat-card">
+          <span class="metric-stat-label">Recall Score</span>
+          <span class="metric-stat-number">${m.recall}%</span>
+        </div>
+        <div class="metric-stat-card">
+          <span class="metric-stat-label">F1-Score</span>
+          <span class="metric-stat-number">${m.f1_score}%</span>
+        </div>
+      `;
+      renderClassificationChart(data.chart_data);
+    }
+  }
+
+  function renderRegressionChart(chartData) {
+    const ctx = document.getElementById('evaluationChart').getContext('2d');
+    if (currentChart) currentChart.destroy();
+
+    currentChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: chartData.labels,
+        datasets: [
+          {
+            label: 'Actual Ground Truth',
+            data: chartData.actual,
+            borderColor: '#0284c7',
+            backgroundColor: 'rgba(2, 132, 199, 0.1)',
+            fill: false,
+            tension: 0.15
+          },
+          {
+            label: 'Model Predictions',
+            data: chartData.predicted,
+            borderColor: '#0d9488',
+            backgroundColor: 'rgba(13, 148, 136, 0.1)',
+            borderDash: [5, 5],
+            fill: false,
+            tension: 0.15
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Actual vs. Predicted Values on Held-out Test Data'
+          }
+        }
+      }
+    });
+  }
+
+  function renderClassificationChart(chartData) {
+    const ctx = document.getElementById('evaluationChart').getContext('2d');
+    if (currentChart) currentChart.destroy();
+
+    const classes = chartData.classes;
+    const cm = chartData.confusion_matrix;
+
+    // Flatten confusion matrix for grouped bar representation
+    const datasets = classes.map((actualClass, i) => {
+      return {
+        label: `Actual: Class ${actualClass}`,
+        data: cm[i],
+        backgroundColor: i === 0 ? '#0d9488' : (i === 1 ? '#0284c7' : '#d97706')
+      };
+    });
+
+    currentChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: classes.map(c => `Predicted: ${c}`),
+        datasets: datasets
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          title: {
+            display: true,
+            text: 'Confusion Matrix (Actual vs. Predicted Class Distribution)'
+          }
+        },
+        scales: {
+          y: {
+            beginAtZero: true,
+            title: { display: true, text: 'Instance Count' }
+          }
+        }
+      }
+    });
+  }
+
+  // Handle Export Retrained Model Artifact
+  btnSaveArtifact.addEventListener('click', async () => {
+    if (!lastTrainedSummary) {
+      alert('Please train a model first.');
+      return;
+    }
+
+    btnSaveArtifact.disabled = true;
+    btnSaveArtifact.textContent = 'Exporting...';
+
+    try {
+      const res = await fetch('/api/save-retrained', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          key: lastTrainedSummary.key,
+          test_size: lastTrainedSummary.test_size_percent / 100,
+          random_state: 42
+        })
+      });
+
+      const data = await res.json();
+      btnSaveArtifact.disabled = false;
+      btnSaveArtifact.innerHTML = `
+        <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>Exported Successfully</span>
+      `;
+
+      if (data.success) {
+        exportStatusText.textContent = data.message;
+        alert(data.message);
+      } else {
+        alert(data.error || 'Failed to export model artifact.');
+      }
+    } catch (err) {
+      btnSaveArtifact.disabled = false;
+      btnSaveArtifact.textContent = 'Export Trained Artifact';
+      alert('Export failed due to network or server error.');
+    }
+  });
+
+  // Event listener on select
+  selectExp.addEventListener('change', () => {
+    loadDatasetPreview(selectExp.value);
+  });
+
+  // Initial load
+  loadDatasetPreview(selectExp.value);
+
+  // Mobile sidebar drawer
+  const sidebar = document.getElementById('sidebar');
+  const mobileToggle = document.getElementById('mobileToggle');
+  const backdrop = document.getElementById('sidebarBackdrop');
+
+  function openSidebar() {
+    sidebar.classList.add('open');
+    backdrop.classList.add('active');
+  }
+
+  function closeSidebar() {
+    sidebar.classList.remove('open');
+    backdrop.classList.remove('active');
+  }
+
+  if (mobileToggle) mobileToggle.addEventListener('click', openSidebar);
+  if (backdrop) backdrop.addEventListener('click', closeSidebar);
+})();
+</script>
+</body>
+</html>

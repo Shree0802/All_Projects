@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block title %}Model Comparison Studio | ML Laboratory{% endblock %}
+{% block breadcrumb %}Model Comparison{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="page-header-pre">MODULE THREE — BENCHMARKING STUDIO</div>
+  <h1 class="page-header-title">Comparative Model Evaluation Studio</h1>
+  <p class="page-header-sub">
+    Evaluate and compare compatible machine learning algorithms fairly on identical datasets, held-out partitions, and random seeds to understand empirical trade-offs.
+  </p>
+</div>
+
+<!-- Preset Benchmark Groups Pill Bar -->
+<div class="card" style="margin-bottom: 24px;">
+  <div class="card-header">
+    <div class="card-title-group">
+      <div class="card-icon"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="12" y1="20" x2="12" y2="10"/><line x1="2" y1="20" x2="22" y2="20"/></svg></div>
+      <div>
+        <h2 class="card-title">Standard Academic Benchmark Groups</h2>
+        <p class="card-subtitle">Pre-configured side-by-side evaluations on baseline laboratory experiments</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <div class="tabs-nav" style="margin-bottom: 16px; overflow-x: auto; white-space: nowrap;">
+      {% for g_key, g_info in groups.items() %}
+        <a href="{{ url_for('comparison', group=g_key) }}" class="tab-item {% if g_key == active_group %}active{% endif %}">
+          {{ g_info.title.split(':')[0] }}
+        </a>
+      {% endfor %}
+    </div>
+
+    <!-- Active Preset Benchmark Details -->
+    <div style="background: var(--slate-50); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px; margin-bottom: 20px;">
+      <h3 style="font-size: 14px; font-weight: 700; color: var(--navy-900); margin-bottom: 4px;">{{ comparison_data.title }}</h3>
+      <p style="font-size: 13px; color: var(--slate-600); line-height: 1.5; margin-bottom: 6px;">{{ comparison_data.description }}</p>
+      {% if comparison_data.note %}
+        <div style="font-size: 12px; color: var(--amber-600); font-weight: 500;">
+          {{ comparison_data.note }}
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- Benchmark Chart -->
+    <div style="width: 100%; height: 360px; margin-bottom: 20px;">
+      <div id="presetComparisonChart" style="width: 100%; height: 100%;"></div>
+    </div>
+
+    <!-- Benchmark Table -->
+    <div style="overflow-x: auto;">
+      <table class="data-table" style="font-size: 12px;">
+        <thead>
+          <tr>
+            <th>Algorithm Architecture</th>
+            <th>Benchmark Dataset</th>
+            {% if comparison_data.category == 'Regression' %}
+              <th>R² Score</th>
+              <th>MAE</th>
+              <th>RMSE</th>
+            {% else %}
+              <th>Accuracy (%)</th>
+              <th>Precision (%)</th>
+              <th>Recall (%)</th>
+              <th>F1-Score (%)</th>
+            {% endif %}
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in comparison_data.results %}
+          <tr>
+            <td><strong>{{ r.name }}</strong></td>
+            <td><code>{{ r.dataset }}</code></td>
+            {% if comparison_data.category == 'Regression' %}
+              <td><span class="badge badge-success">{{ r.metrics.r2_score }}</span></td>
+              <td><strong>{{ r.metrics.mae }}</strong></td>
+              <td><strong>{{ r.metrics.rmse }}</strong></td>
+            {% else %}
+              <td><span class="badge badge-success">{{ r.metrics.accuracy }}%</span></td>
+              <td>{{ r.metrics.precision }}%</td>
+              <td>{{ r.metrics.recall }}%</td>
+              <td><strong>{{ r.metrics.f1_score }}%</strong></td>
+            {% endif %}
+            <td>
+              <a href="{{ url_for('results', key=r.key) }}" class="btn btn-secondary btn-sm" style="font-size: 11px;">View Results &rarr;</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Custom Interactive Multi-Model Comparison Studio -->
+<div class="card">
+  <div class="card-header">
+    <div class="card-title-group">
+      <div class="card-icon" style="background: var(--teal-50); color: var(--teal-600);"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></div>
+      <div>
+        <h2 class="card-title">Custom Multi-Model Comparison Studio</h2>
+        <p class="card-subtitle">Train and evaluate multiple models concurrently on any uploaded or project dataset</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-body">
+    <form id="customCompareForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 20px;">
+      <!-- Dataset Selection -->
+      <div class="form-group">
+        <label class="form-label">Select Dataset</label>
+        <select id="compDatasetSelect" class="form-control" required>
+          {% for d in dataset_list %}
+            <option value="{{ d.filename }}">{{ d.filename }} ({{ d.rows }} rows)</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Target Column (Dynamically loaded) -->
+      <div class="form-group">
+        <label class="form-label">Target Column</label>
+        <select id="compTargetSelect" class="form-control" required>
+          <option value="">Loading columns...</option>
+        </select>
+      </div>
+
+      <!-- Test Split Ratio -->
+      <div class="form-group">
+        <label class="form-label">Test Split Ratio: <span id="splitValLabel">20%</span></label>
+        <input type="range" id="compTestSplit" min="0.1" max="0.4" step="0.05" value="0.2" class="form-range" oninput="document.getElementById('splitValLabel').innerText = Math.round(this.value*100) + '%';">
+      </div>
+
+      <!-- Random Seed -->
+      <div class="form-group">
+        <label class="form-label">Random Seed</label>
+        <input type="number" id="compRandomSeed" value="42" class="form-control">
+      </div>
+    </form>
+
+    <!-- Algorithm Selection Checkboxes -->
+    <div style="margin-bottom: 20px;">
+      <label class="form-label">Select Algorithms to Compare:</label>
+      <div id="algoCheckboxes" style="display: flex; flex-wrap: wrap; gap: 12px; margin-top: 8px;">
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer;">
+          <input type="checkbox" name="comp_algo" value="logistic_regression" checked> Logistic Regression
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer;">
+          <input type="checkbox" name="comp_algo" value="decision_tree" checked> Decision Tree
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer;">
+          <input type="checkbox" name="comp_algo" value="random_forest" checked> Random Forest
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer;">
+          <input type="checkbox" name="comp_algo" value="knn" checked> KNN
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer;">
+          <input type="checkbox" name="comp_algo" value="linear_svm" checked> Linear SVM
+        </label>
+        <label style="display: flex; align-items: center; gap: 6px; font-size: 13px; cursor: pointer;">
+          <input type="checkbox" name="comp_algo" value="rbf_svm"> Nonlinear RBF SVM
+        </label>
+      </div>
+    </div>
+
+    <button type="button" class="btn btn-primary" id="btnRunCustomCompare">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width: 15px; height: 15px; margin-right: 6px;"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      Run Fair Model Comparison
+    </button>
+
+    <!-- Custom Comparison Output Area -->
+    <div id="customCompareOutput" style="margin-top: 24px; display: none;">
+      <div style="width: 100%; height: 380px; margin-bottom: 20px;">
+        <div id="customCompareChart" style="width: 100%; height: 100%;"></div>
+      </div>
+
+      <div style="overflow-x: auto;">
+        <table class="data-table" id="customCompareTable" style="font-size: 12px;">
+          <!-- Dynamically populated -->
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  // 1. Render Preset Comparison Chart
+  const presetData = {{ comparison_data.chart_json | tojson if comparison_data.chart_json else '{}' }};
+  if (presetData && presetData.data && document.getElementById("presetComparisonChart")) {
+    Plotly.newPlot("presetComparisonChart", presetData.data, presetData.layout, { responsive: true, displayModeBar: false });
+  }
+
+  // 2. Load dataset columns when dataset changes
+  const datasetSelect = document.getElementById("compDatasetSelect");
+  const targetSelect = document.getElementById("compTargetSelect");
+
+  async function loadColumns(filename) {
+    targetSelect.innerHTML = "<option>Loading columns...</option>";
+    try {
+      const res = await fetch("/api/dataset-schema/" + encodeURIComponent(filename));
+      const data = await res.json();
+      if (data.success && data.schema) {
+        targetSelect.innerHTML = "";
+        data.schema.columns.forEach(col => {
+          const opt = document.createElement("option");
+          opt.value = col;
+          opt.innerText = col;
+          if (data.schema.recommended_targets.includes(col)) {
+            opt.selected = true;
+          }
+          targetSelect.appendChild(opt);
+        });
+      }
+    } catch (err) {
+      targetSelect.innerHTML = "<option value=''>Error loading columns</option>";
+    }
+  }
+
+  if (datasetSelect) {
+    datasetSelect.addEventListener("change", () => loadColumns(datasetSelect.value));
+    loadColumns(datasetSelect.value);
+  }
+
+  // 3. Run Custom Fair Comparison
+  const btnRun = document.getElementById("btnRunCustomCompare");
+  const outputBox = document.getElementById("customCompareOutput");
+
+  if (btnRun) {
+    btnRun.addEventListener("click", async () => {
+      const dataset = datasetSelect.value;
+      const target = targetSelect.value;
+      const testSplit = parseFloat(document.getElementById("compTestSplit").value);
+      const randomSeed = parseInt(document.getElementById("compRandomSeed").value);
+
+      const checkboxes = document.querySelectorAll("input[name='comp_algo']:checked");
+      const selectedAlgos = Array.from(checkboxes).map(cb => cb.value);
+
+      if (selectedAlgos.length === 0) {
+        alert("Please select at least one algorithm to evaluate.");
+        return;
+      }
+
+      btnRun.disabled = true;
+      btnRun.innerText = "Training & benchmarking algorithms...";
+
+      try {
+        const res = await fetch("/api/compare", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            dataset: dataset,
+            target: target,
+            algorithms: selectedAlgos,
+            test_size: testSplit,
+            random_state: randomSeed
+          })
+        });
+
+        const data = await res.json();
+        btnRun.disabled = false;
+        btnRun.innerText = "Run Fair Model Comparison";
+
+        if (data.success && data.data) {
+          outputBox.style.display = "block";
+          const resObj = data.data;
+
+          // Render chart
+          Plotly.newPlot("customCompareChart", resObj.chart_json.data, resObj.chart_json.layout, { responsive: true, displayModeBar: false });
+
+          // Render table
+          const table = document.getElementById("customCompareTable");
+          let headers = `<thead><tr><th>Rank</th><th>Algorithm</th>`;
+          if (resObj.is_regression) {
+            headers += `<th>R² Score</th><th>MAE</th><th>RMSE</th><th>Training Time</th></tr></thead>`;
+          } else {
+            headers += `<th>Accuracy</th><th>Precision</th><th>Recall</th><th>F1-Score</th><th>Training Time</th></tr></thead>`;
+          }
+
+          let tbody = `<tbody>`;
+          resObj.results.forEach((r, idx) => {
+            const m = r.metrics;
+            tbody += `<tr><td><strong>#${idx + 1}</strong></td><td><strong>${r.name}</strong></td>`;
+            if (resObj.is_regression) {
+              tbody += `<td><span class="badge badge-success">${m.r2_score}</span></td><td>${m.mae}</td><td>${m.rmse}</td><td>${r.duration_ms} ms</td></tr>`;
+            } else {
+              tbody += `<td><span class="badge badge-success">${m.accuracy}%</span></td><td>${m.precision}%</td><td>${m.recall}%</td><td><strong>${m.f1_score}%</strong></td><td>${r.duration_ms} ms</td></tr>`;
+            }
+          });
+          tbody += `</tbody>`;
+          table.innerHTML = headers + tbody;
+        } else {
+          alert("Comparison failed: " + (data.error || "Unknown error"));
+        }
+      } catch (err) {
+        btnRun.disabled = false;
+        btnRun.innerText = "Run Fair Model Comparison";
+        alert("Request error: " + err);
+      }
+    });
+  }
+});
+</script>
+{% endblock %}
