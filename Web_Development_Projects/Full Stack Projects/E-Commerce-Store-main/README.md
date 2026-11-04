@@ -1,5 +1,5 @@
 # 🛍️ ShopSphere – Modern Full Stack E-Commerce Store
-# Website Link: https://modern-full-stack-e-commerce-store.vercel.app/
+# Website Link:
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-green.svg)](https://nodejs.org/)
